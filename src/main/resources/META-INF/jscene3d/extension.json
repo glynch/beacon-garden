@@ -7,5 +7,23 @@
   "displayName": "Beacon Garden",
   "description": "Project-specific component metadata for Beacon Garden.",
   "types": [],
-  "components": []
+  "components": [
+    {
+      "id": "io.github.glynch.beacon-garden/garden-behavior",
+      "typeVersion": 1,
+      "displayName": "Garden Behavior",
+      "description": "Coordinates Beacon Garden's runtime-created pulse.",
+      "properties": [
+        {
+          "id": "pulse-definition",
+          "valueKind": "reference",
+          "required": true,
+          "displayName": "Pulse Definition",
+          "description": "Entity definition spawned when this behavior first updates.",
+          "acceptedReferences": ["asset"]
+        }
+      ],
+      "updatePhases": ["before-physics"]
+    }
+  ]
 }

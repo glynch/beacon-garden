@@ -1,0 +1,43 @@
+{
+  "$schema": "https://jscene3d.org/schemas/entity-definition-1.json",
+  "assetId": "d4c94a8e-678c-4438-bbef-2f92103f8149",
+  "assetType": "entity-definition",
+  "formatVersion": 1,
+  "name": "Beacon Pulse",
+  "contract": {
+    "parameters": [],
+    "signals": [],
+    "actions": [],
+    "capabilities": [],
+    "attachments": [],
+    "resourceBindings": []
+  },
+  "connections": [],
+  "root": {
+    "entryType": "local",
+    "entityId": "87d9751a-6498-448c-b8f9-53ac8d797981",
+    "name": "Beacon Pulse",
+    "enabled": true,
+    "components": [
+      {
+        "componentId": "4732a24f-d141-4bf0-9c13-7ab39b065cd9",
+        "type": "io.github.glynch.jscene3d.spatial3d/transform-3d",
+        "typeVersion": 1,
+        "properties": {
+          "position": [0, 1, 0]
+        }
+      },
+      {
+        "componentId": "ecad7d10-0b72-4330-8a2e-0ab55a6ac5d2",
+        "type": "io.github.glynch.jscene3d.spatial3d/directional-light-3d",
+        "typeVersion": 1,
+        "properties": {
+          "color": [0.35, 0.9, 1],
+          "intensity": 4,
+          "target": [0, 0, 0]
+        }
+      }
+    ],
+    "children": []
+  }
+}

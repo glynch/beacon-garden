@@ -92,7 +92,18 @@
       "entityId": "d19ae6cf-a8cd-437b-a00a-27dffdd903dd",
       "name": "Garden Behavior",
       "enabled": true,
-      "components": [],
+      "components": [
+        {
+          "componentId": "fd201861-8733-41ba-b28e-bd234badd1f1",
+          "type": "io.github.glynch.beacon-garden/garden-behavior",
+          "typeVersion": 1,
+          "properties": {
+            "pulse-definition": {
+              "$ref": "asset:d4c94a8e-678c-4438-bbef-2f92103f8149"
+            }
+          }
+        }
+      ],
       "children": []
     }
   ]

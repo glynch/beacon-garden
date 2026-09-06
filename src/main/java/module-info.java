@@ -8,4 +8,7 @@ module io.github.glynch.beacon.garden {
     requires io.github.glynch.jscene3d.project.runtime;
     requires io.github.glynch.jscene3d.project.spatial3d;
     requires static org.jspecify;
+
+    provides io.github.glynch.jscene3d.project.runtime.extension.ComponentRuntimeExtension with
+            io.github.glynch.beacongarden.BeaconGardenRuntimeExtension;
 }

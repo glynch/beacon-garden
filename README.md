@@ -21,4 +21,6 @@ Run the headless startup path with:
 ```
 
 The application should report that it loaded five world roots, activated a
-primary camera, and closed the spatial adapter.
+primary camera, observed the pulse spawn as pending during its requesting
+callback and active after the phase boundary, then destroyed that runtime child
+and closed the spatial adapter.
