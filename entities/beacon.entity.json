@@ -1,0 +1,33 @@
+{
+  "$schema": "https://jscene3d.org/schemas/entity-definition-1.json",
+  "assetId": "7f69bab1-32bf-4edc-bb82-0cc19c285bd1",
+  "assetType": "entity-definition",
+  "formatVersion": 1,
+  "name": "Beacon",
+  "contract": {
+    "parameters": [],
+    "signals": [],
+    "actions": [],
+    "capabilities": [],
+    "attachments": [],
+    "resourceBindings": []
+  },
+  "connections": [],
+  "root": {
+    "entryType": "local",
+    "entityId": "b0c0014b-2c02-4407-a797-cc5c98d790d5",
+    "name": "Beacon",
+    "enabled": true,
+    "components": [
+      {
+        "componentId": "839e53d6-1fc2-42c1-9814-ec206ec8411f",
+        "type": "io.github.glynch.jscene3d.spatial3d/transform-3d",
+        "typeVersion": 1,
+        "properties": {
+          "position": [0, 0, 0]
+        }
+      }
+    ],
+    "children": []
+  }
+}

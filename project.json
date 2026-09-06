@@ -1,0 +1,32 @@
+{
+  "$schema": "https://jscene3d.org/schemas/project-1.json",
+  "schemaVersion": 1,
+  "identity": {
+    "id": "io.github.glynch.beacon-garden",
+    "name": "Beacon Garden",
+    "version": "0.1.0",
+    "description": "A small interactive garden proving JScene3D project composition."
+  },
+  "engine": {
+    "requires": ">=0.1.0-SNAPSHOT <0.2.0",
+    "authoredWith": "0.1.0-SNAPSHOT"
+  },
+  "runtime": {
+    "applicationExtension": "io.github.glynch.beacon-garden",
+    "entryScene": "worlds/garden.world.json"
+  },
+  "extensions": [
+    {
+      "id": "io.github.glynch.beacon-garden",
+      "requires": ">=0.1.0 <0.2.0"
+    }
+  ],
+  "catalog": {
+    "genres": ["exploration"],
+    "tags": ["garden", "three-dimensional"],
+    "players": {
+      "minimum": 1,
+      "maximum": 1
+    }
+  }
+}
