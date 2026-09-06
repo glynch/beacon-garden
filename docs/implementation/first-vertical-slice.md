@@ -187,7 +187,8 @@ public scheduling model.
 
 ### 7. glTF publication
 
-Adapt the existing glTF importer so a selected scene publishes:
+Implement glTF project import without routing generated project content through
+the lower-level renderer `Scene` graph. A selected scene publishes:
 
 - a generated read-only `EntityDefinition`;
 - referenced immutable mesh, material, texture, skin, and animation assets as
@@ -200,8 +201,8 @@ result after correctness is proven.
 
 ### 8. Minimal collision realization
 
-Adapt the existing renderer-independent physics work behind world and component
-interfaces:
+Replace the existing project/runtime physics architecture with a physics module
+and component interfaces that provide:
 
 - one static collision body where needed by the garden;
 - one non-blocking sensor/area body;
