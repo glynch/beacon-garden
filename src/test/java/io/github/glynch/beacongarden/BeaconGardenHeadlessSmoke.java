@@ -24,6 +24,7 @@ import java.util.logging.Logger;
 
 /** Developer-only scripted smoke test for Beacon Garden's manifest-to-live-world startup path. */
 public final class BeaconGardenHeadlessSmoke {
+    private static final int ARGUMENT_COUNT = 2;
     private static final String ENGINE_VERSION = "0.1.0-SNAPSHOT";
     private static final Logger LOGGER = Logger.getLogger(BeaconGardenHeadlessSmoke.class.getName());
     private static final EntityId GARDEN_PLACEMENT = EntityId.from("cf795ee1-fe86-4b46-bbc1-b98ca9107fe5");
@@ -37,14 +38,15 @@ public final class BeaconGardenHeadlessSmoke {
     /**
      * Loads, activates, reports, and closes Beacon Garden from its project directory.
      *
-     * @param arguments exactly one project-directory path
+     * @param arguments project-directory and published-content-directory paths
      */
     public static void main(String[] arguments) {
-        if (arguments.length != 1) {
-            throw new IllegalArgumentException("expected one Beacon Garden project-directory path");
+        if (arguments.length != ARGUMENT_COUNT) {
+            throw new IllegalArgumentException(
+                    "expected Beacon Garden project-directory and published-content-directory paths");
         }
         Path projectRoot = Path.of(arguments[0]).toAbsolutePath().normalize();
-        Path publishedImports = projectRoot.resolve("target/import-cache");
+        Path publishedImports = Path.of(arguments[1]).toAbsolutePath().normalize();
         ProjectHost host = new ProjectRuntimeHost(
                 ENGINE_VERSION,
                 BeaconGardenHeadlessSmoke.class.getClassLoader(),

@@ -14,6 +14,7 @@
     <description>First playable consumer of the JScene3D entity-component world architecture.</description>
 
     <properties>
+        <beacon.garden.application.image>${project.build.directory}/export/beacon-garden</beacon.garden.application.image>
         <jscene3d.coverage.branch.minimum>0.70</jscene3d.coverage.branch.minimum>
         <jscene3d.coverage.line.minimum>0.85</jscene3d.coverage.line.minimum>
         <maven.deploy.skip>true</maven.deploy.skip>
@@ -195,7 +196,85 @@
                                     <classpathScope>test</classpathScope>
                                     <arguments>
                                         <argument>${project.basedir}</argument>
+                                        <argument>${project.build.directory}/import-cache</argument>
                                     </arguments>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>export-directory</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-resources-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>prepare-export-launchers</id>
+                                <phase>prepare-package</phase>
+                                <goals>
+                                    <goal>copy-resources</goal>
+                                </goals>
+                                <configuration>
+                                    <outputDirectory>${project.build.directory}/generated-export/bin</outputDirectory>
+                                    <delimiters>
+                                        <delimiter>@</delimiter>
+                                    </delimiters>
+                                    <useDefaultDelimiters>false</useDefaultDelimiters>
+                                    <resources>
+                                        <resource>
+                                            <directory>src/export/bin</directory>
+                                            <filtering>true</filtering>
+                                        </resource>
+                                    </resources>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-assembly-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>assemble-exported-application</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>single</goal>
+                                </goals>
+                                <configuration>
+                                    <appendAssemblyId>false</appendAssemblyId>
+                                    <attach>false</attach>
+                                    <descriptors>
+                                        <descriptor>src/assembly/application-image.xml</descriptor>
+                                    </descriptors>
+                                    <finalName>beacon-garden</finalName>
+                                    <outputDirectory>${project.build.directory}/export</outputDirectory>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-failsafe-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>verify-exported-application</id>
+                                <goals>
+                                    <goal>integration-test</goal>
+                                    <goal>verify</goal>
+                                </goals>
+                                <configuration>
+                                    <includes>
+                                        <include>**/ExportedApplicationImageIT.java</include>
+                                    </includes>
+                                    <systemPropertyVariables>
+                                        <beaconGarden.applicationImage>${beacon.garden.application.image}</beaconGarden.applicationImage>
+                                        <beaconGarden.testClasses>${project.build.testOutputDirectory}</beaconGarden.testClasses>
+                                    </systemPropertyVariables>
                                 </configuration>
                             </execution>
                         </executions>

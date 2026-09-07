@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ Copyright 2026 Graham Lynch
+ SPDX-License-Identifier: Apache-2.0
+-->
+<assembly xmlns="http://maven.apache.org/ASSEMBLY/2.2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/ASSEMBLY/2.2.0 https://maven.apache.org/xsd/assembly-2.2.0.xsd">
+    <id>application-image</id>
+    <formats>
+        <format>dir</format>
+    </formats>
+    <includeBaseDirectory>false</includeBaseDirectory>
+    <dependencySets>
+        <dependencySet>
+            <outputDirectory>lib</outputDirectory>
+            <scope>runtime</scope>
+            <unpack>false</unpack>
+            <useProjectArtifact>true</useProjectArtifact>
+            <useTransitiveDependencies>true</useTransitiveDependencies>
+            <excludes>
+                <exclude>io.github.glynch:jscene3d-gltf</exclude>
+                <exclude>de.javagl:*</exclude>
+                <exclude>dev.fileformat:drako</exclude>
+                <exclude>org.jspecify:jspecify</exclude>
+            </excludes>
+        </dependencySet>
+    </dependencySets>
+    <fileSets>
+        <fileSet>
+            <directory>${project.basedir}</directory>
+            <outputDirectory>project</outputDirectory>
+            <useDefaultExcludes>true</useDefaultExcludes>
+            <includes>
+                <include>project.json</include>
+                <include>config/input-map.json</include>
+                <include>entities/**</include>
+                <include>imports/**</include>
+                <include>resources/**</include>
+                <include>worlds/**</include>
+            </includes>
+        </fileSet>
+        <fileSet>
+            <directory>${project.build.directory}/import-cache</directory>
+            <outputDirectory>content</outputDirectory>
+            <useDefaultExcludes>true</useDefaultExcludes>
+            <excludes>
+                <exclude>**/.commit.lock</exclude>
+                <exclude>staging/**</exclude>
+            </excludes>
+        </fileSet>
+        <fileSet>
+            <directory>${project.build.directory}/generated-export/bin</directory>
+            <outputDirectory>bin</outputDirectory>
+            <fileMode>0755</fileMode>
+            <useDefaultExcludes>true</useDefaultExcludes>
+        </fileSet>
+    </fileSets>
+    <files>
+        <file>
+            <source>${project.basedir}/LICENSE</source>
+            <outputDirectory>/</outputDirectory>
+        </file>
+    </files>
+</assembly>

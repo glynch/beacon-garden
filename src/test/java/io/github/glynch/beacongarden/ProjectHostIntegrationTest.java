@@ -262,7 +262,7 @@ final class ProjectHostIntegrationTest {
 
         assertThatThrownBy(() -> BeaconGardenHeadlessSmoke.main(arguments))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("one Beacon Garden project-directory path");
+                .hasMessageContaining("project-directory and published-content-directory");
     }
 
     /** Rejects build-time publication without both explicit filesystem locations. */
@@ -278,7 +278,7 @@ final class ProjectHostIntegrationTest {
     /** Runs the scripted headless smoke entry point against the generic project host. */
     @Test
     void runsHeadlessSmoke() {
-        String[] arguments = {PROJECT_ROOT.toString()};
+        String[] arguments = {PROJECT_ROOT.toString(), importCache(PROJECT_ROOT).toString()};
 
         BeaconGardenHeadlessSmoke.main(arguments);
     }
