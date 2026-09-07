@@ -47,10 +47,10 @@ action. The initially muted-green garden should become brighter green after the
 first pulse. The current pulse definition adds a persistent directional light,
 so it has no visible mesh, does not fade, and is spawned only once.
 
-Build and verify a relocatable application directory with:
+Build a relocatable application directory with:
 
 ```shell
-./mvnw clean verify -Pexport-directory
+./mvnw clean package -Pexport-directory
 ```
 
 The engine-owned project exporter produces the resulting
@@ -59,18 +59,15 @@ imports, and Maven-resolved runtime JARs. Maven does not define the directory
 layout or generate its launchers. The application directory contains the
 application JAR, engine and third-party runtime JARs, host-selected LWJGL
 natives, runtime project JSON, published import artifacts, and generic desktop
-launch scripts.
-It deliberately contains no Java sources, tests, headless smoke launcher, raw
-glTF source, Maven files, or import tooling dependencies. The export integration
-test copies that directory to a temporary directory outside the source checkout
-and runs the project against only the relocated runtime files. This directory
-form uses the host platform's native libraries and requires an installed Java
-21 runtime.
+launch scripts. It deliberately contains no Java sources, tests, headless smoke
+launcher, raw glTF source, Maven files, or import tooling dependencies. This
+directory form uses the host platform's native libraries and requires an
+installed Java 21 runtime.
 
-Build and verify a macOS application image with:
+Build a macOS application image with:
 
 ```shell
-./mvnw clean verify -Pexport-directory,export-macos-app
+./mvnw clean package -Pexport-directory,export-macos-app
 ```
 
 The engine-owned native exporter consumes the completed application directory
@@ -84,3 +81,41 @@ generated image with:
 ```shell
 open "target/export-native/Beacon Garden.app"
 ```
+
+Build a macOS disk image from that completed application image with:
+
+```shell
+./mvnw clean package -Pexport-directory,export-macos-app,export-macos-dmg
+```
+
+The engine-owned disk-image exporter reads the application name and native
+version embedded in the `.app`; the build does not repeat or reconstruct that
+identity. It passes the completed application image to `jpackage`, then
+transactionally installs `target/distributions/Beacon Garden-1.0.0.dmg`.
+Signing and notarization remain outside this slice. Open the generated disk
+image with:
+
+```shell
+open "target/distributions/Beacon Garden-1.0.0.dmg"
+```
+
+Export profiles only assemble artifacts; they never deliberately start the
+game. Structurally verify every exported form, including a read-only DMG mount,
+with the following non-graphical command, which is intended for CI:
+
+```shell
+./mvnw clean verify -Pexport-directory,export-macos-app,export-macos-dmg,verify-export-directory,verify-macos-app,verify-macos-dmg
+```
+
+The directory verification runs a headless runtime probe from a relocated
+copy. The macOS verifications inspect a relocated `.app`, verify the DMG, mount
+it with `-nobrowse`, and inspect its packaged runtime and project content. They
+do not start a graphical application. A developer or suitably configured CI
+runner can explicitly exercise both native launch paths with:
+
+```shell
+./mvnw verify -Pexport-directory,export-macos-app,export-macos-dmg,verify-macos-launch
+```
+
+That last profile starts and closes the application image once, then starts and
+closes the application once more from the read-only mounted DMG.

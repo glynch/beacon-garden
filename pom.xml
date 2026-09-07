@@ -17,6 +17,8 @@
         <beacon.garden.application.directory>${project.build.directory}/export/beacon-garden</beacon.garden.application.directory>
         <beacon.garden.application.image.directory>${project.build.directory}/export-native</beacon.garden.application.image.directory>
         <beacon.garden.application.image>${beacon.garden.application.image.directory}/Beacon Garden.app</beacon.garden.application.image>
+        <beacon.garden.disk.image.directory>${project.build.directory}/distributions</beacon.garden.disk.image.directory>
+        <beacon.garden.disk.image>${beacon.garden.disk.image.directory}/Beacon Garden-${beacon.garden.native.version}.dmg</beacon.garden.disk.image>
         <beacon.garden.native.version>1.0.0</beacon.garden.native.version>
         <jscene3d.coverage.branch.minimum>0.70</jscene3d.coverage.branch.minimum>
         <jscene3d.coverage.line.minimum>0.85</jscene3d.coverage.line.minimum>
@@ -275,28 +277,6 @@
                             </execution>
                         </executions>
                     </plugin>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-failsafe-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>verify-exported-application-directory</id>
-                                <goals>
-                                    <goal>integration-test</goal>
-                                    <goal>verify</goal>
-                                </goals>
-                                <configuration>
-                                    <includes>
-                                        <include>**/ExportedApplicationDirectoryIT.java</include>
-                                    </includes>
-                                    <systemPropertyVariables>
-                                        <beaconGarden.applicationDirectory>${beacon.garden.application.directory}</beaconGarden.applicationDirectory>
-                                        <beaconGarden.testClasses>${project.build.testOutputDirectory}</beaconGarden.testClasses>
-                                    </systemPropertyVariables>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
                 </plugins>
             </build>
         </profile>
@@ -329,7 +309,7 @@
                         <executions>
                             <execution>
                                 <id>assemble-macos-application-image</id>
-                                <phase>pre-integration-test</phase>
+                                <phase>package</phase>
                                 <goals>
                                     <goal>java</goal>
                                 </goals>
@@ -345,6 +325,89 @@
                             </execution>
                         </executions>
                     </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>export-macos-dmg</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-enforcer-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>require-macos-for-disk-image</id>
+                                <goals>
+                                    <goal>enforce</goal>
+                                </goals>
+                                <configuration>
+                                    <rules>
+                                        <requireOS>
+                                            <family>mac</family>
+                                        </requireOS>
+                                    </rules>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>assemble-macos-disk-image</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>java</goal>
+                                </goals>
+                                <configuration>
+                                    <mainClass>io.github.glynch.jscene3d.project.exporting.internal.MacOsDiskImageExportCommand</mainClass>
+                                    <classpathScope>compile</classpathScope>
+                                    <arguments>
+                                        <argument>${beacon.garden.application.image}</argument>
+                                        <argument>${beacon.garden.disk.image.directory}</argument>
+                                    </arguments>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>verify-export-directory</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-failsafe-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>verify-exported-application-directory</id>
+                                <goals>
+                                    <goal>integration-test</goal>
+                                    <goal>verify</goal>
+                                </goals>
+                                <configuration>
+                                    <includes>
+                                        <include>**/ExportedApplicationDirectoryIT.java</include>
+                                    </includes>
+                                    <systemPropertyVariables>
+                                        <beaconGarden.applicationDirectory>${beacon.garden.application.directory}</beaconGarden.applicationDirectory>
+                                        <beaconGarden.testClasses>${project.build.testOutputDirectory}</beaconGarden.testClasses>
+                                    </systemPropertyVariables>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>verify-macos-app</id>
+            <build>
+                <plugins>
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-failsafe-plugin</artifactId>
@@ -361,7 +424,63 @@
                                     </includes>
                                     <systemPropertyVariables>
                                         <beaconGarden.applicationImage>${beacon.garden.application.image}</beaconGarden.applicationImage>
-                                        <beaconGarden.testClasses>${project.build.testOutputDirectory}</beaconGarden.testClasses>
+                                    </systemPropertyVariables>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>verify-macos-dmg</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-failsafe-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>verify-macos-disk-image</id>
+                                <goals>
+                                    <goal>integration-test</goal>
+                                    <goal>verify</goal>
+                                </goals>
+                                <configuration>
+                                    <includes>
+                                        <include>**/ExportedMacDiskImageIT.java</include>
+                                    </includes>
+                                    <systemPropertyVariables>
+                                        <beaconGarden.diskImage>${beacon.garden.disk.image}</beaconGarden.diskImage>
+                                    </systemPropertyVariables>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>verify-macos-launch</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-failsafe-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>verify-macos-native-launchers</id>
+                                <goals>
+                                    <goal>integration-test</goal>
+                                    <goal>verify</goal>
+                                </goals>
+                                <configuration>
+                                    <includes>
+                                        <include>**/ExportedMacLaunchIT.java</include>
+                                    </includes>
+                                    <systemPropertyVariables>
+                                        <beaconGarden.applicationImage>${beacon.garden.application.image}</beaconGarden.applicationImage>
+                                        <beaconGarden.diskImage>${beacon.garden.disk.image}</beaconGarden.diskImage>
                                     </systemPropertyVariables>
                                 </configuration>
                             </execution>

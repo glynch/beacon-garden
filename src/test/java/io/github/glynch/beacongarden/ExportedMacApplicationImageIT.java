@@ -6,17 +6,13 @@ package io.github.glynch.beacongarden;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
-import java.util.Objects;
-import java.util.concurrent.TimeUnit;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.stream.Stream;
@@ -26,15 +22,13 @@ import org.junit.jupiter.api.io.TempDir;
 /** Verifies the native macOS image using only a relocated application bundle. */
 final class ExportedMacApplicationImageIT {
     private static final String APPLICATION_IMAGE_PROPERTY = "beaconGarden.applicationImage";
-    private static final long STARTUP_OBSERVATION_SECONDS = 3;
-    private static final long TERMINATION_WAIT_SECONDS = 5;
 
     @TempDir
     private Path temporaryDirectory;
 
-    /** Proves that the native launcher, bundled runtime, application code, and runtime data are self-contained. */
+    /** Proves structurally that the native launcher, runtime, application code, and data are self-contained. */
     @Test
-    void launchesRelocatedNativeImage() throws IOException, InterruptedException {
+    void containsSelfContainedRelocatedNativeImage() throws IOException {
         Path image = temporaryDirectory.resolve("Beacon Garden.app");
         copyTree(requiredPath(APPLICATION_IMAGE_PROPERTY), image);
         Path applicationRoot = image.resolve("Contents/app");
@@ -75,35 +69,6 @@ final class ExportedMacApplicationImageIT {
                 .doesNotContain("BeaconGardenHeadlessSmoke", "development/projects/beacon-garden");
         assertThat(launcher).isRegularFile().isExecutable();
         assertThat(runtimeModules).isRegularFile();
-
-        assertNativeLauncherStarts(launcher);
-    }
-
-    /** Starts the relocated bundle and requires it to remain live until the test closes it. */
-    private static void assertNativeLauncherStarts(Path launcher) throws IOException, InterruptedException {
-        Process process = new ProcessBuilder(launcher.toString())
-                .directory(Objects.requireNonNull(launcher.getParent(), "launcher parent")
-                        .toFile())
-                .redirectErrorStream(true)
-                .start();
-        boolean exited = process.waitFor(STARTUP_OBSERVATION_SECONDS, TimeUnit.SECONDS);
-        if (exited) {
-            String output = readOutput(process);
-            fail("Relocated native application exited during startup with code %d:%n%s", process.exitValue(), output);
-        }
-        process.destroy();
-        if (!process.waitFor(TERMINATION_WAIT_SECONDS, TimeUnit.SECONDS)) {
-            process.destroyForcibly();
-            process.waitFor(TERMINATION_WAIT_SECONDS, TimeUnit.SECONDS);
-        }
-        assertThat(process.isAlive()).isFalse();
-    }
-
-    /** Reads all native-launcher output after its process has exited. */
-    private static String readOutput(Process process) throws IOException {
-        try (InputStream output = process.getInputStream()) {
-            return new String(output.readAllBytes(), UTF_8);
-        }
     }
 
     /** Copies a complete application bundle while preserving runtime symbolic links. */
