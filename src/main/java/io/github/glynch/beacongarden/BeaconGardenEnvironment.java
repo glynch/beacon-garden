@@ -4,10 +4,13 @@
  */
 package io.github.glynch.beacongarden;
 
+import io.github.glynch.jscene3d.game.input.InputWorldModule;
+import io.github.glynch.jscene3d.game.input.ProjectInput;
 import io.github.glynch.jscene3d.project.asset.AssetCatalog;
 import io.github.glynch.jscene3d.project.extension.ExtensionDescriptor;
 import io.github.glynch.jscene3d.project.extension.RegisteredTypeCatalog;
 import io.github.glynch.jscene3d.project.importing.PublishedProjectContent;
+import io.github.glynch.jscene3d.project.input.InputMapDefinition;
 import io.github.glynch.jscene3d.project.manifest.GameProject;
 import io.github.glynch.jscene3d.project.physics3d.Physics3dAdapters;
 import io.github.glynch.jscene3d.project.physics3d.Physics3dDescriptors;
@@ -27,6 +30,7 @@ import io.github.glynch.jscene3d.project.spatial3d.Spatial3dWorldModule;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /** Headless Beacon Garden environment combining standard 3D presentation and collision facilities. */
 final class BeaconGardenEnvironment implements ProjectRuntimeEnvironment {
@@ -48,8 +52,11 @@ final class BeaconGardenEnvironment implements ProjectRuntimeEnvironment {
     }
 
     @Override
-    public List<WorldModuleBinding<?>> createWorldModules() {
+    public List<WorldModuleBinding<?>> createWorldModules(Optional<InputMapDefinition> inputMap) {
+        ProjectInput input = new ProjectInput(
+                inputMap.orElseThrow(() -> new IllegalArgumentException("Beacon Garden requires a project input map")));
         return List.of(
+                WorldModuleBinding.of(InputWorldModule.class, input),
                 WorldModuleBinding.of(Spatial3dWorldModule.class, Spatial3dAdapters.standard()),
                 WorldModuleBinding.of(Physics3dWorldModule.class, Physics3dAdapters.standard()));
     }

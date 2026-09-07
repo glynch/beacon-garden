@@ -4,6 +4,8 @@
  */
 package io.github.glynch.beacongarden;
 
+import io.github.glynch.jscene3d.game.input.InputAction;
+import io.github.glynch.jscene3d.game.input.InputWorldModule;
 import io.github.glynch.jscene3d.project.asset.AssetId;
 import io.github.glynch.jscene3d.project.asset.AssetRef;
 import io.github.glynch.jscene3d.project.component.PropertyId;
@@ -20,6 +22,7 @@ import java.util.Optional;
 public final class BeaconGardenRuntimeExtension implements ApplicationRuntimeExtension {
     static final String ID = "io.github.glynch.beacon-garden";
     private static final PropertyId PULSE_DEFINITION = new PropertyId("pulse-definition");
+    private static final PropertyId PULSE_ACTION = new PropertyId("pulse-action");
 
     /** Creates the stateless provider used by standard Java service discovery. */
     public BeaconGardenRuntimeExtension() {
@@ -40,8 +43,10 @@ public final class BeaconGardenRuntimeExtension implements ApplicationRuntimeExt
                 GardenBehavior.TYPE,
                 context -> new GardenBehavior(
                         context.spawnTarget(),
-                        pulseDefinition(Objects.requireNonNull(
-                                context.properties().get(PULSE_DEFINITION), "pulse-definition"))));
+                        pulseDefinition(
+                                Objects.requireNonNull(context.properties().get(PULSE_DEFINITION), "pulse-definition")),
+                        context.world().requireModule(InputWorldModule.class),
+                        inputAction(Objects.requireNonNull(context.properties().get(PULSE_ACTION), "pulse-action"))));
         validRegistry.register(BeaconResponse.TYPE, context -> new BeaconResponse());
     }
 
@@ -61,5 +66,13 @@ public final class BeaconGardenRuntimeExtension implements ApplicationRuntimeExt
             throw new IllegalArgumentException("pulse-definition must be an asset reference");
         }
         return AssetRef.to(AssetId.from(reference.locator()));
+    }
+
+    /** Converts one descriptor-validated text value into a semantic action identity. */
+    private static InputAction inputAction(ProjectValue value) {
+        if (!(value instanceof ProjectValue.TextValue(String name))) {
+            throw new IllegalArgumentException("pulse-action must be text");
+        }
+        return new InputAction(name);
     }
 }

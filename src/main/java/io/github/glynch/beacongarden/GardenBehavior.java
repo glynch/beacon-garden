@@ -4,6 +4,8 @@
  */
 package io.github.glynch.beacongarden;
 
+import io.github.glynch.jscene3d.game.input.InputAction;
+import io.github.glynch.jscene3d.game.input.InputWorldModule;
 import io.github.glynch.jscene3d.project.asset.AssetRef;
 import io.github.glynch.jscene3d.project.component.ComponentId;
 import io.github.glynch.jscene3d.project.component.ComponentType;
@@ -38,6 +40,8 @@ final class GardenBehavior implements ComponentReferenceBinder, ComponentEndpoin
 
     private final SpawnTarget spawnTarget;
     private final AssetRef<EntityDefinition> pulseDefinition;
+    private final InputWorldModule input;
+    private final InputAction pulseAction;
     private final List<CollisionOverlap3d> enteredOverlaps = new ArrayList<>();
     private Optional<PreparedEntityDefinition> preparedPulse = Optional.empty();
     private Optional<SpawnOperation> pulseSpawn = Optional.empty();
@@ -45,9 +49,15 @@ final class GardenBehavior implements ComponentReferenceBinder, ComponentEndpoin
     private Optional<DirectionalLight3d> indicatorLight = Optional.empty();
 
     /** Stores the owner-scoped spawn capability supplied during construction. */
-    GardenBehavior(SpawnTarget spawnTarget, AssetRef<EntityDefinition> pulseDefinition) {
+    GardenBehavior(
+            SpawnTarget spawnTarget,
+            AssetRef<EntityDefinition> pulseDefinition,
+            InputWorldModule input,
+            InputAction pulseAction) {
         this.spawnTarget = Objects.requireNonNull(spawnTarget, "spawnTarget");
         this.pulseDefinition = Objects.requireNonNull(pulseDefinition, "pulseDefinition");
+        this.input = Objects.requireNonNull(input, "input");
+        this.pulseAction = Objects.requireNonNull(pulseAction, "pulseAction");
     }
 
     /** Returns the authored reusable definition dependency selected in project data. */
@@ -103,11 +113,11 @@ final class GardenBehavior implements ComponentReferenceBinder, ComponentEndpoin
         endpoints.action(RECEIVE_OVERLAP, this::receiveOverlap);
     }
 
-    /** Requests one owned pulse during the first eligible update and leaves later updates unchanged. */
+    /** Requests one owned pulse on the first authored pulse-action press. */
     @Override
     public void onBeforePhysics(FixedUpdateContext update) {
         Objects.requireNonNull(update, "update");
-        if (pulseSpawn.isPresent()) {
+        if (pulseSpawn.isPresent() || !input.snapshot().wasPressed(pulseAction)) {
             return;
         }
         PreparedEntityDefinition prepared = preparedPulse.orElseThrow(

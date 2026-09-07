@@ -13,7 +13,8 @@
   },
   "runtime": {
     "applicationExtension": "io.github.glynch.beacon-garden",
-    "entryScene": "worlds/garden.world.json"
+    "entryScene": "worlds/garden.world.json",
+    "inputMap": "config/input-map.json"
   },
   "extensions": [
     {

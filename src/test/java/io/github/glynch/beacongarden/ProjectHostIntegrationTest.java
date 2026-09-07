@@ -7,6 +7,10 @@ package io.github.glynch.beacongarden;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import io.github.glynch.jscene3d.game.input.ActionSnapshot;
+import io.github.glynch.jscene3d.game.input.InputAction;
+import io.github.glynch.jscene3d.game.input.InputWorldModule;
+import io.github.glynch.jscene3d.game.input.ProjectInput;
 import io.github.glynch.jscene3d.project.asset.AssetId;
 import io.github.glynch.jscene3d.project.asset.AssetKind;
 import io.github.glynch.jscene3d.project.component.ComponentId;
@@ -57,6 +61,7 @@ final class ProjectHostIntegrationTest {
     private static final ComponentId SENSOR_BOX = ComponentId.from("4575ddab-ce91-4d79-84a1-14849cd6a792");
     private static final ComponentId SENSOR_SPHERE = ComponentId.from("6b7d9fd9-d036-40d9-8528-a179c3f08390");
     private static final ComponentId GARDEN_MESH_RENDERER = ComponentId.from("8b369046-b207-379f-850b-39d099ed2da8");
+    private static final InputAction PULSE = new InputAction("pulse");
     private static final Path PROJECT_ROOT = Path.of(System.getProperty("beaconGarden.projectRoot", "."))
             .toAbsolutePath()
             .normalize();
@@ -76,6 +81,7 @@ final class ProjectHostIntegrationTest {
         HostedProject loaded = load(PROJECT_ROOT);
         Spatial3dWorldModule spatial = loaded.world().requireModule(Spatial3dWorldModule.class);
         Physics3dWorldModule physics = loaded.world().requireModule(Physics3dWorldModule.class);
+        InputWorldModule input = loaded.world().requireModule(InputWorldModule.class);
 
         assertThat(loaded.project().identity().id()).isEqualTo("io.github.glynch.beacon-garden");
         assertThat(loaded.assets().assets())
@@ -88,6 +94,7 @@ final class ProjectHostIntegrationTest {
         assertThat(spatial.isReadyToRender()).isFalse();
         assertThat(physics.collisionObjectCount()).isEqualTo(2);
         assertThat(physics.collisionShapeCount()).isEqualTo(3);
+        assertThat(input.snapshot()).isEqualTo(ActionSnapshot.empty());
 
         loaded.world().activate();
 
@@ -203,6 +210,9 @@ final class ProjectHostIntegrationTest {
             loaded.world().activate();
             assertThat(behavior.children()).isEmpty();
             loaded.world().advanceFixed(Duration.ofMillis(16L));
+            assertThat(behavior.children()).isEmpty();
+            publishPulse(loaded);
+            loaded.world().advanceFixed(Duration.ofMillis(16L));
 
             assertThat(gardenBehavior.pulseStatusAtRequest()).isEqualTo(SpawnStatus.PENDING);
             assertThat(gardenBehavior.pulseSpawn().status()).isEqualTo(SpawnStatus.ACTIVE);
@@ -227,6 +237,7 @@ final class ProjectHostIntegrationTest {
             Entity behavior = authoredRoot(loaded, GARDEN_BEHAVIOR_ENTITY);
             Spatial3dWorldModule spatial = loaded.world().requireModule(Spatial3dWorldModule.class);
             loaded.world().activate();
+            publishPulse(loaded);
             loaded.world().advanceFixed(Duration.ofMillis(16L));
             Entity pulse = behavior.children().getFirst();
             RuntimeEntityId pulseId = pulse.id();
@@ -369,10 +380,12 @@ final class ProjectHostIntegrationTest {
     private void copyProject() throws IOException {
         Files.createDirectories(temporaryDirectory.resolve("entities"));
         Files.createDirectories(temporaryDirectory.resolve("assets"));
+        Files.createDirectories(temporaryDirectory.resolve("config"));
         Files.createDirectories(temporaryDirectory.resolve("imports"));
         Files.createDirectories(temporaryDirectory.resolve("resources"));
         Files.createDirectories(temporaryDirectory.resolve("worlds"));
         Files.copy(PROJECT_ROOT.resolve("project.json"), temporaryDirectory.resolve("project.json"));
+        Files.copy(PROJECT_ROOT.resolve("config/input-map.json"), temporaryDirectory.resolve("config/input-map.json"));
         Files.copy(
                 PROJECT_ROOT.resolve("entities/beacon.entity.json"),
                 temporaryDirectory.resolve("entities/beacon.entity.json"));
@@ -409,6 +422,12 @@ final class ProjectHostIntegrationTest {
                 .filter(entity -> entity.authoredId().equals(authoredId))
                 .findFirst()
                 .orElseThrow();
+    }
+
+    /** Publishes a deterministic semantic press through the same world input module used by gameplay. */
+    private static void publishPulse(HostedProject loaded) {
+        ProjectInput input = (ProjectInput) loaded.world().requireModule(InputWorldModule.class);
+        input.publish(ActionSnapshot.builder().pressed(PULSE).build());
     }
 
     /** Captures the payload-bearing endpoint installed by a component under test. */

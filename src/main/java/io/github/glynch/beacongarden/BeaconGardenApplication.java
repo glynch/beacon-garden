@@ -4,6 +4,10 @@
  */
 package io.github.glynch.beacongarden;
 
+import io.github.glynch.jscene3d.game.input.ActionSnapshot;
+import io.github.glynch.jscene3d.game.input.InputAction;
+import io.github.glynch.jscene3d.game.input.InputWorldModule;
+import io.github.glynch.jscene3d.game.input.ProjectInput;
 import io.github.glynch.jscene3d.project.entity.EntityId;
 import io.github.glynch.jscene3d.project.physics3d.Physics3dWorldModule;
 import io.github.glynch.jscene3d.project.runtime.Entity;
@@ -22,6 +26,7 @@ public final class BeaconGardenApplication {
     private static final String ENGINE_VERSION = "0.1.0-SNAPSHOT";
     private static final Logger LOGGER = Logger.getLogger(BeaconGardenApplication.class.getName());
     private static final EntityId GARDEN_PLACEMENT = EntityId.from("cf795ee1-fe86-4b46-bbc1-b98ca9107fe5");
+    private static final InputAction PULSE = new InputAction("pulse");
 
     /** Prevents construction of this application entry point. */
     private BeaconGardenApplication() {
@@ -47,6 +52,7 @@ public final class BeaconGardenApplication {
         try (loaded) {
             Spatial3dWorldModule spatial = loaded.world().requireModule(Spatial3dWorldModule.class);
             Physics3dWorldModule physics = loaded.world().requireModule(Physics3dWorldModule.class);
+            ProjectInput input = (ProjectInput) loaded.world().requireModule(InputWorldModule.class);
             GardenBehavior behavior = gardenBehavior(loaded);
             BeaconResponse beaconResponse = beaconResponse(loaded);
             Entity garden = authoredRoot(loaded, GARDEN_PLACEMENT);
@@ -60,6 +66,9 @@ public final class BeaconGardenApplication {
                     + physics.collisionShapeCount());
             float indicatorBeforeOverlap = behavior.indicatorIntensity();
             float beaconIndicatorBeforeOverlap = beaconResponse.indicatorIntensity();
+            input.publish(ActionSnapshot.builder().pressed(PULSE).build());
+            LOGGER.info(
+                    () -> "Authored pulse action pressed = " + input.snapshot().wasPressed(PULSE));
             loaded.world().advanceFixed(Duration.ofMillis(16L));
             SpawnOperation pulseSpawn = behavior.pulseSpawn();
             Entity pulse = pulseSpawn.entity().orElseThrow();

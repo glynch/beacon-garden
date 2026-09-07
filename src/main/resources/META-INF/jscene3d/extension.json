@@ -23,6 +23,13 @@
           "acceptedReferences": ["asset"]
         },
         {
+          "id": "pulse-action",
+          "valueKind": "text",
+          "required": true,
+          "displayName": "Pulse Action",
+          "description": "Semantic input action which spawns the runtime pulse."
+        },
+        {
           "id": "indicator-light",
           "valueKind": "component_target",
           "required": true,
