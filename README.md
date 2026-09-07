@@ -28,6 +28,8 @@ The smoke test should report six world roots, five live entities in the
 generated Garden instance, an active primary camera, two collision objects
 containing three independently authored shapes, and two entered overlaps
 identifying the Beacon sensor's two exact shape components. It should also
+identify the Garden as an authored placement of its generated definition and
+the Beacon Pulse as a runtime spawn of its authored definition. Finally, it should
 report the garden indicator changing from intensity `2.5` to `6.0`, the
 reusable Beacon instance's indicator changing from `0.0` to `1.5`, the pulse
 changing from pending to active at the phase boundary, and both world adapters

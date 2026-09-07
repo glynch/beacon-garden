@@ -64,6 +64,8 @@ public final class BeaconGardenHeadlessSmoke {
             LOGGER.info(() -> "World roots = " + loaded.world().roots().size());
             LOGGER.info(() -> "Garden generated definition = "
                     + garden.children().getFirst().authoredAsset() + ", live entities = " + entityCount(garden));
+            LOGGER.info(() -> "Garden origin = " + garden.instantiationKind() + ", definition = "
+                    + garden.instantiatedDefinition().orElseThrow());
             LOGGER.info(() -> "Primary camera active = " + spatial.isReadyToRender());
             LOGGER.info(() -> "Collision objects = " + physics.collisionObjectCount() + ", shapes = "
                     + physics.collisionShapeCount());
@@ -78,6 +80,8 @@ public final class BeaconGardenHeadlessSmoke {
             Entity pulseOwner = pulse.parent().orElseThrow();
             LOGGER.info(() -> "Pulse status at request = " + behavior.pulseStatusAtRequest());
             LOGGER.info(() -> "Pulse status after boundary = " + pulseSpawn.status());
+            LOGGER.info(() -> "Pulse origin = " + pulse.instantiationKind() + ", definition = "
+                    + pulse.instantiatedDefinition().orElseThrow());
             LOGGER.info(
                     () -> "Runtime pulse children = " + pulseOwner.children().size());
             LOGGER.info(() -> "Entered overlaps = " + behavior.enteredOverlaps().size() + ", sensor shapes = "

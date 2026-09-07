@@ -22,6 +22,7 @@ import io.github.glynch.jscene3d.project.physics3d.CollisionShape3d;
 import io.github.glynch.jscene3d.project.physics3d.CollisionShape3dResource;
 import io.github.glynch.jscene3d.project.physics3d.Physics3dWorldModule;
 import io.github.glynch.jscene3d.project.runtime.Entity;
+import io.github.glynch.jscene3d.project.runtime.EntityInstantiationKind;
 import io.github.glynch.jscene3d.project.runtime.HostedProject;
 import io.github.glynch.jscene3d.project.runtime.ProjectHost;
 import io.github.glynch.jscene3d.project.runtime.ProjectHostException;
@@ -221,6 +222,8 @@ final class ProjectHostIntegrationTest {
                 assertThat(pulse.name()).contains("Beacon Pulse");
                 assertThat(pulse.parent()).contains(behavior);
                 assertThat(pulse.authoredAsset()).isEqualTo(BEACON_PULSE_ASSET);
+                assertThat(pulse.instantiationKind()).isEqualTo(EntityInstantiationKind.SPAWN);
+                assertThat(pulse.instantiatedDefinition()).contains(BEACON_PULSE_ASSET);
                 assertThat(pulse.isEnabled()).isTrue();
                 assertThat(gardenBehavior.pulseSpawn().entity()).contains(pulse);
             });
@@ -252,6 +255,22 @@ final class ProjectHostIntegrationTest {
             assertThat(behavior.children()).isEmpty();
             assertThat(loaded.world().find(pulseId)).isEmpty();
             assertThat(spatial.findTransform(pulse)).isEmpty();
+        }
+    }
+
+    /** Distinguishes local entities and authored definition placements before runtime mutation begins. */
+    @Test
+    void exposesAuthoredLiveHierarchyProvenance() {
+        try (HostedProject loaded = load(PROJECT_ROOT)) {
+            Entity garden = authoredRoot(loaded, GARDEN_PLACEMENT);
+            Entity behavior = authoredRoot(loaded, GARDEN_BEHAVIOR_ENTITY);
+
+            assertThat(garden)
+                    .returns(EntityInstantiationKind.PLACEMENT, Entity::instantiationKind)
+                    .returns(Optional.of(GARDEN_DEFINITION), Entity::instantiatedDefinition);
+            assertThat(behavior)
+                    .returns(EntityInstantiationKind.LOCAL_ENTITY, Entity::instantiationKind)
+                    .returns(Optional.empty(), Entity::instantiatedDefinition);
         }
     }
 

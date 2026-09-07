@@ -61,7 +61,9 @@ final class ExportedApplicationImageIT {
         assertThat(output)
                 .contains(
                         "Loaded project = Beacon Garden",
+                        "Garden origin = PLACEMENT",
                         "Pulse status after boundary = ACTIVE",
+                        "Pulse origin = SPAWN",
                         "Entered overlaps = 2",
                         "Physics adapter closed = true, spatial adapter closed = true");
     }
