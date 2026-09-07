@@ -23,6 +23,11 @@
   ],
   "assets": [
     {
+      "id": "garden-model",
+      "type": "io.github.glynch.jscene3d.gltf/source",
+      "path": "assets/garden.gltf"
+    },
+    {
       "id": "beacon-sensor-box",
       "type": "io.github.glynch.jscene3d.physics3d/box-collision-shape-3d",
       "path": "resources/beacon-sensor-box.resource.json"
@@ -37,6 +42,9 @@
       "type": "io.github.glynch.jscene3d.physics3d/box-collision-shape-3d",
       "path": "resources/garden-overlap-target.resource.json"
     }
+  ],
+  "imports": [
+    "imports/garden.import.json"
   ],
   "catalog": {
     "genres": ["exploration"],

@@ -29,6 +29,9 @@ import io.github.glynch.jscene3d.project.runtime.RuntimeSignal;
 import io.github.glynch.jscene3d.project.runtime.SpawnStatus;
 import io.github.glynch.jscene3d.project.runtime.extension.ComponentEndpoints;
 import io.github.glynch.jscene3d.project.spatial3d.DirectionalLight3d;
+import io.github.glynch.jscene3d.project.spatial3d.Material3dResource;
+import io.github.glynch.jscene3d.project.spatial3d.Mesh3dResource;
+import io.github.glynch.jscene3d.project.spatial3d.MeshRenderer3d;
 import io.github.glynch.jscene3d.project.spatial3d.Spatial3dWorldModule;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -36,6 +39,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.Optional;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -43,19 +47,28 @@ import org.junit.jupiter.api.io.TempDir;
 final class ProjectHostIntegrationTest {
     private static final String ENGINE_VERSION = "0.1.0-SNAPSHOT";
     private static final AssetId BEACON_PULSE_ASSET = AssetId.from("d4c94a8e-678c-4438-bbef-2f92103f8149");
+    private static final AssetId GARDEN_DEFINITION = AssetId.from("0dff6469-a27b-3b7e-b680-45ace4bd46b9");
     private static final EntityId GARDEN_BEHAVIOR_ENTITY = EntityId.from("d19ae6cf-a8cd-437b-a00a-27dffdd903dd");
+    private static final EntityId GARDEN_PLACEMENT = EntityId.from("cf795ee1-fe86-4b46-bbc1-b98ca9107fe5");
     private static final EntityId BEACON_PLACEMENT = EntityId.from("e9f4ab33-c25f-4dc7-b08c-1de71a83175c");
     private static final EntityId SUN_ENTITY = EntityId.from("e30e1867-444a-45c8-93ce-c8aaad2a1813");
     private static final ComponentId SUN_LIGHT = ComponentId.from("224343e5-57fe-462f-9205-56f6ae1fd218");
     private static final ComponentId BEACON_LIGHT = ComponentId.from("8c594962-2f31-4917-ab5f-56caa132a688");
     private static final ComponentId SENSOR_BOX = ComponentId.from("4575ddab-ce91-4d79-84a1-14849cd6a792");
     private static final ComponentId SENSOR_SPHERE = ComponentId.from("6b7d9fd9-d036-40d9-8528-a179c3f08390");
+    private static final ComponentId GARDEN_MESH_RENDERER = ComponentId.from("8b369046-b207-379f-850b-39d099ed2da8");
     private static final Path PROJECT_ROOT = Path.of(System.getProperty("beaconGarden.projectRoot", "."))
             .toAbsolutePath()
             .normalize();
 
     @TempDir
     private Path temporaryDirectory;
+
+    /** Ensures direct IDE test execution has the same published inputs as the Maven lifecycle. */
+    @BeforeAll
+    static void publishProjectImports() {
+        BeaconGardenContentPublisher.publish(PROJECT_ROOT, importCache(PROJECT_ROOT));
+    }
 
     /** Loads, activates, and closes the authored startup project without application-specific loader code. */
     @Test
@@ -123,6 +136,41 @@ final class ProjectHostIntegrationTest {
             assertThat(sensorResource.isClosed()).isFalse();
         }
         assertThat(sensorResource.isClosed()).isTrue();
+    }
+
+    /** Publishes and composes the Garden glTF as project-native entities and owned runtime resources. */
+    @Test
+    void composesPublishedGardenDefinitionAndReleasesResources() throws IOException {
+        copyProject();
+        Path cache = importCache(temporaryDirectory);
+        BeaconGardenContentPublisher.publish(temporaryDirectory, cache);
+        BeaconGardenContentPublisher.publish(temporaryDirectory, cache);
+        MeshRenderer3d renderer;
+        Mesh3dResource mesh;
+        Material3dResource material;
+
+        try (HostedProject loaded = load(temporaryDirectory, cache)) {
+            Entity garden = authoredRoot(loaded, GARDEN_PLACEMENT);
+            Entity generatedRoot = garden.children().getFirst();
+            Entity westBed = generatedRoot.children().getFirst();
+            renderer = westBed.component(GARDEN_MESH_RENDERER, MeshRenderer3d.class)
+                    .orElseThrow();
+            mesh = renderer.mesh();
+            material = renderer.material();
+
+            assertThat(generatedRoot.authoredAsset()).isEqualTo(GARDEN_DEFINITION);
+            assertThat(generatedRoot.name()).contains("Garden Beds");
+            assertThat(generatedRoot.children())
+                    .extracting(entity -> entity.name().orElseThrow())
+                    .containsExactly("West Bed", "Central Bed", "East Bed");
+            assertThat(renderer.isVisible()).isTrue();
+            assertThat(mesh.isClosed()).isFalse();
+            assertThat(material.isClosed()).isFalse();
+        }
+
+        assertThat(renderer.isClosed()).isTrue();
+        assertThat(mesh.isClosed()).isTrue();
+        assertThat(material.isClosed()).isTrue();
     }
 
     /** Rejects a payload whose runtime value violates the descriptor-declared overlap contract. */
@@ -203,6 +251,16 @@ final class ProjectHostIntegrationTest {
         assertThatThrownBy(() -> BeaconGardenApplication.main(arguments))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("one Beacon Garden project-directory path");
+    }
+
+    /** Rejects build-time publication without both explicit filesystem locations. */
+    @Test
+    void rejectsMissingPublisherArguments() {
+        String[] arguments = {};
+
+        assertThatThrownBy(() -> BeaconGardenContentPublisher.main(arguments))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("project-directory and import-cache");
     }
 
     /** Runs the supported headless application entry point against the generic project host. */
@@ -290,14 +348,28 @@ final class ProjectHostIntegrationTest {
 
     /** Creates the same generic host that an editor preview or exported launcher supplies. */
     private static HostedProject load(Path projectRoot) {
+        return load(projectRoot, importCache(projectRoot));
+    }
+
+    /** Creates a generic host with one explicit published-import cache. */
+    private static HostedProject load(Path projectRoot, Path cacheRoot) {
         ProjectHost host = new ProjectRuntimeHost(
-                ENGINE_VERSION, ProjectHostIntegrationTest.class.getClassLoader(), new BeaconGardenEnvironment());
+                ENGINE_VERSION,
+                ProjectHostIntegrationTest.class.getClassLoader(),
+                new BeaconGardenEnvironment(cacheRoot));
         return host.load(projectRoot);
+    }
+
+    /** Returns the Maven-owned publication location used by the headless application. */
+    private static Path importCache(Path projectRoot) {
+        return projectRoot.resolve("target/import-cache");
     }
 
     /** Copies the authored project documents into the test's isolated directory. */
     private void copyProject() throws IOException {
         Files.createDirectories(temporaryDirectory.resolve("entities"));
+        Files.createDirectories(temporaryDirectory.resolve("assets"));
+        Files.createDirectories(temporaryDirectory.resolve("imports"));
         Files.createDirectories(temporaryDirectory.resolve("resources"));
         Files.createDirectories(temporaryDirectory.resolve("worlds"));
         Files.copy(PROJECT_ROOT.resolve("project.json"), temporaryDirectory.resolve("project.json"));
@@ -307,6 +379,10 @@ final class ProjectHostIntegrationTest {
         Files.copy(
                 PROJECT_ROOT.resolve("entities/beacon-pulse.entity.json"),
                 temporaryDirectory.resolve("entities/beacon-pulse.entity.json"));
+        Files.copy(PROJECT_ROOT.resolve("assets/garden.gltf"), temporaryDirectory.resolve("assets/garden.gltf"));
+        Files.copy(
+                PROJECT_ROOT.resolve("imports/garden.import.json"),
+                temporaryDirectory.resolve("imports/garden.import.json"));
         Files.copy(
                 PROJECT_ROOT.resolve("resources/beacon-sensor-box.resource.json"),
                 temporaryDirectory.resolve("resources/beacon-sensor-box.resource.json"));

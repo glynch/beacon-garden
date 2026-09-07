@@ -1,0 +1,10 @@
+{
+  "$schema": "https://jscene3d.org/schemas/import-1.json",
+  "schemaVersion": 1,
+  "id": "garden-import",
+  "source": "asset:garden-model",
+  "importer": "io.github.glynch.jscene3d.gltf/scene",
+  "selection": [
+    "scenes/0000"
+  ]
+}

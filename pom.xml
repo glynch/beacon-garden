@@ -37,6 +37,11 @@
             <artifactId>jscene3d-project-import</artifactId>
         </dependency>
         <dependency>
+            <groupId>io.github.glynch</groupId>
+            <artifactId>jscene3d-gltf</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
             <groupId>org.jspecify</groupId>
             <artifactId>jspecify</artifactId>
             <scope>provided</scope>
@@ -54,10 +59,54 @@
     </dependencies>
 
     <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.eclipse.m2e</groupId>
+                    <artifactId>lifecycle-mapping</artifactId>
+                    <version>1.0.0</version>
+                    <configuration>
+                        <lifecycleMappingMetadata>
+                            <pluginExecutions>
+                                <pluginExecution>
+                                    <pluginExecutionFilter>
+                                        <groupId>org.codehaus.mojo</groupId>
+                                        <artifactId>exec-maven-plugin</artifactId>
+                                        <versionRange>[3.6.3,)</versionRange>
+                                        <goals>
+                                            <goal>java</goal>
+                                        </goals>
+                                    </pluginExecutionFilter>
+                                    <action>
+                                        <ignore />
+                                    </action>
+                                </pluginExecution>
+                            </pluginExecutions>
+                        </lifecycleMappingMetadata>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
         <plugins>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>publish-imports</id>
+                        <phase>process-classes</phase>
+                        <goals>
+                            <goal>java</goal>
+                        </goals>
+                        <configuration>
+                            <mainClass>io.github.glynch.beacongarden.BeaconGardenContentPublisher</mainClass>
+                            <arguments>
+                                <argument>${project.basedir}</argument>
+                                <argument>${project.build.directory}/import-cache</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
@@ -73,7 +122,7 @@
                         <executions>
                             <execution>
                                 <id>run-headless</id>
-                                <phase>compile</phase>
+                                <phase>process-classes</phase>
                                 <goals>
                                     <goal>java</goal>
                                 </goals>

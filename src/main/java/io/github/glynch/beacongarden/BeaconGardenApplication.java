@@ -4,6 +4,7 @@
  */
 package io.github.glynch.beacongarden;
 
+import io.github.glynch.jscene3d.project.entity.EntityId;
 import io.github.glynch.jscene3d.project.physics3d.Physics3dWorldModule;
 import io.github.glynch.jscene3d.project.runtime.Entity;
 import io.github.glynch.jscene3d.project.runtime.HostedProject;
@@ -20,6 +21,7 @@ import java.util.logging.Logger;
 public final class BeaconGardenApplication {
     private static final String ENGINE_VERSION = "0.1.0-SNAPSHOT";
     private static final Logger LOGGER = Logger.getLogger(BeaconGardenApplication.class.getName());
+    private static final EntityId GARDEN_PLACEMENT = EntityId.from("cf795ee1-fe86-4b46-bbc1-b98ca9107fe5");
 
     /** Prevents construction of this application entry point. */
     private BeaconGardenApplication() {
@@ -36,17 +38,23 @@ public final class BeaconGardenApplication {
             throw new IllegalArgumentException("expected one Beacon Garden project-directory path");
         }
         Path projectRoot = Path.of(arguments[0]).toAbsolutePath().normalize();
+        Path publishedImports = projectRoot.resolve("target/import-cache");
         ProjectHost host = new ProjectRuntimeHost(
-                ENGINE_VERSION, BeaconGardenApplication.class.getClassLoader(), new BeaconGardenEnvironment());
+                ENGINE_VERSION,
+                BeaconGardenApplication.class.getClassLoader(),
+                new BeaconGardenEnvironment(publishedImports));
         HostedProject loaded = host.load(projectRoot);
         try (loaded) {
             Spatial3dWorldModule spatial = loaded.world().requireModule(Spatial3dWorldModule.class);
             Physics3dWorldModule physics = loaded.world().requireModule(Physics3dWorldModule.class);
             GardenBehavior behavior = gardenBehavior(loaded);
             BeaconResponse beaconResponse = beaconResponse(loaded);
+            Entity garden = authoredRoot(loaded, GARDEN_PLACEMENT);
             loaded.world().activate();
             LOGGER.info(() -> "Loaded project = " + loaded.project().identity().name());
             LOGGER.info(() -> "World roots = " + loaded.world().roots().size());
+            LOGGER.info(() -> "Garden generated definition = "
+                    + garden.children().getFirst().authoredAsset() + ", live entities = " + entityCount(garden));
             LOGGER.info(() -> "Primary camera active = " + spatial.isReadyToRender());
             LOGGER.info(() -> "Collision objects = " + physics.collisionObjectCount() + ", shapes = "
                     + physics.collisionShapeCount());
@@ -91,5 +99,21 @@ public final class BeaconGardenApplication {
                 .flatMap(Optional::stream)
                 .findFirst()
                 .orElseThrow(() -> new IllegalStateException("startup world has no Beacon Response component"));
+    }
+
+    /** Finds one authored world root by stable placement or local identity. */
+    private static Entity authoredRoot(HostedProject loaded, EntityId authoredId) {
+        return loaded.world().roots().stream()
+                .filter(entity -> entity.authoredId().equals(authoredId))
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException("startup world has no entity " + authoredId));
+    }
+
+    /** Counts one live hierarchy without depending on generated definition internals. */
+    private static int entityCount(Entity root) {
+        return 1
+                + root.children().stream()
+                        .mapToInt(BeaconGardenApplication::entityCount)
+                        .sum();
     }
 }

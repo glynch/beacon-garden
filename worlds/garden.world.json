@@ -74,19 +74,14 @@
       "children": []
     },
     {
-      "entryType": "local",
+      "entryType": "placement",
       "entityId": "cf795ee1-fe86-4b46-bbc1-b98ca9107fe5",
       "name": "Garden",
       "enabled": true,
-      "components": [
-        {
-          "componentId": "c4f1e38e-fbaf-42fe-8906-8e968bb91299",
-          "type": "io.github.glynch.jscene3d.spatial3d/transform-3d",
-          "typeVersion": 1,
-          "properties": {}
-        }
-      ],
-      "children": []
+      "definition": {
+        "assetId": "0dff6469-a27b-3b7e-b680-45ace4bd46b9"
+      },
+      "arguments": {}
     },
     {
       "entryType": "local",

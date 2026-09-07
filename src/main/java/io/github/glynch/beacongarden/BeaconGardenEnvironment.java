@@ -7,7 +7,7 @@ package io.github.glynch.beacongarden;
 import io.github.glynch.jscene3d.project.asset.AssetCatalog;
 import io.github.glynch.jscene3d.project.extension.ExtensionDescriptor;
 import io.github.glynch.jscene3d.project.extension.RegisteredTypeCatalog;
-import io.github.glynch.jscene3d.project.importing.ImportedRuntimeResources;
+import io.github.glynch.jscene3d.project.importing.PublishedProjectContent;
 import io.github.glynch.jscene3d.project.manifest.GameProject;
 import io.github.glynch.jscene3d.project.physics3d.Physics3dAdapters;
 import io.github.glynch.jscene3d.project.physics3d.Physics3dDescriptors;
@@ -24,11 +24,19 @@ import io.github.glynch.jscene3d.project.spatial3d.Spatial3dDescriptors;
 import io.github.glynch.jscene3d.project.spatial3d.Spatial3dResourceLoaders;
 import io.github.glynch.jscene3d.project.spatial3d.Spatial3dRuntimeExtension;
 import io.github.glynch.jscene3d.project.spatial3d.Spatial3dWorldModule;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
 /** Headless Beacon Garden environment combining standard 3D presentation and collision facilities. */
 final class BeaconGardenEnvironment implements ProjectRuntimeEnvironment {
+    private final Path publishedImports;
+
+    /** Selects the read-only published-import cache used by project composition. */
+    BeaconGardenEnvironment(Path publishedImports) {
+        this.publishedImports = publishedImports.toAbsolutePath().normalize();
+    }
+
     @Override
     public List<ExtensionDescriptor> descriptors() {
         return List.of(Spatial3dDescriptors.extensionDescriptor(), Physics3dDescriptors.extensionDescriptor());
@@ -51,6 +59,6 @@ final class BeaconGardenEnvironment implements ProjectRuntimeEnvironment {
         List<RuntimeResourceLoader<?>> loaders = new ArrayList<>();
         loaders.addAll(Spatial3dResourceLoaders.all());
         loaders.addAll(Physics3dResourceLoaders.all());
-        return new ProjectContent(authored, ImportedRuntimeResources.create(project, types, loaders));
+        return PublishedProjectContent.load(project, types, authored, publishedImports, loaders);
     }
 }

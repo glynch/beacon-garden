@@ -1,0 +1,81 @@
+{
+  "asset": {
+    "version": "2.0",
+    "generator": "Beacon Garden"
+  },
+  "scene": 0,
+  "scenes": [
+    {
+      "name": "Garden Geometry",
+      "nodes": [0]
+    }
+  ],
+  "nodes": [
+    {
+      "name": "Garden Beds",
+      "children": [1, 2, 3]
+    },
+    {
+      "name": "West Bed",
+      "mesh": 0,
+      "translation": [-2.4, 0.0, 0.0],
+      "scale": [0.8, 0.35, 1.4]
+    },
+    {
+      "name": "Central Bed",
+      "mesh": 0,
+      "translation": [0.0, 0.0, 0.0],
+      "scale": [1.25, 0.4, 1.25]
+    },
+    {
+      "name": "East Bed",
+      "mesh": 0,
+      "translation": [2.4, 0.0, 0.0],
+      "scale": [0.8, 0.35, 1.4]
+    }
+  ],
+  "meshes": [
+    {
+      "name": "Garden Bed",
+      "primitives": [
+        {
+          "attributes": {
+            "POSITION": 0,
+            "NORMAL": 1,
+            "TEXCOORD_0": 2
+          },
+          "indices": 3,
+          "material": 0
+        }
+      ]
+    }
+  ],
+  "materials": [
+    {
+      "name": "Garden Earth",
+      "pbrMetallicRoughness": {
+        "baseColorFactor": [0.22, 0.42, 0.12, 1.0],
+        "metallicFactor": 0.0,
+        "roughnessFactor": 0.88
+      }
+    }
+  ],
+  "buffers": [
+    {
+      "uri": "data:application/octet-stream;base64,AACAvwAAgL8AAIA/AACAPwAAgL8AAIA/AACAPwAAgD8AAIA/AACAvwAAgD8AAIA/AACAPwAAgL8AAIC/AACAvwAAgL8AAIC/AACAvwAAgD8AAIC/AACAPwAAgD8AAIC/AACAvwAAgL8AAIC/AACAvwAAgL8AAIA/AACAvwAAgD8AAIA/AACAvwAAgD8AAIC/AACAPwAAgL8AAIA/AACAPwAAgL8AAIC/AACAPwAAgD8AAIC/AACAPwAAgD8AAIA/AACAvwAAgD8AAIA/AACAPwAAgD8AAIA/AACAPwAAgD8AAIC/AACAvwAAgD8AAIC/AACAvwAAgL8AAIC/AACAPwAAgL8AAIC/AACAPwAAgL8AAIA/AACAvwAAgL8AAIA/AAAAAAAAAAAAAIA/AAAAAAAAAAAAAIA/AAAAAAAAAAAAAIA/AAAAAAAAAAAAAIA/AAAAAAAAAAAAAIC/AAAAAAAAAAAAAIC/AAAAAAAAAAAAAIC/AAAAAAAAAAAAAIC/AACAvwAAAAAAAAAAAACAvwAAAAAAAAAAAACAvwAAAAAAAAAAAACAvwAAAAAAAAAAAACAPwAAAAAAAAAAAACAPwAAAAAAAAAAAACAPwAAAAAAAAAAAACAPwAAAAAAAAAAAAAAAAAAgD8AAAAAAAAAAAAAgD8AAAAAAAAAAAAAgD8AAAAAAAAAAAAAgD8AAAAAAAAAAAAAgL8AAAAAAAAAAAAAgL8AAAAAAAAAAAAAgL8AAAAAAAAAAAAAgL8AAAAAAAAAAAAAAAAAAIA/AAAAAAAAgD8AAIA/AAAAAAAAgD8AAAAAAAAAAAAAgD8AAAAAAACAPwAAgD8AAAAAAACAPwAAAAAAAAAAAACAPwAAAAAAAIA/AACAPwAAAAAAAIA/AAAAAAAAAAAAAIA/AAAAAAAAgD8AAIA/AAAAAAAAgD8AAAAAAAAAAAAAgD8AAAAAAACAPwAAgD8AAAAAAACAPwAAAAAAAAAAAACAPwAAAAAAAIA/AACAPwAAAAAAAIA/AAABAAIAAAACAAMABAAFAAYABAAGAAcACAAJAAoACAAKAAsADAANAA4ADAAOAA8AEAARABIAEAASABMAFAAVABYAFAAWABcA",
+      "byteLength": 840
+    }
+  ],
+  "bufferViews": [
+    {"buffer": 0, "byteOffset": 0, "byteLength": 288},
+    {"buffer": 0, "byteOffset": 288, "byteLength": 288},
+    {"buffer": 0, "byteOffset": 576, "byteLength": 192},
+    {"buffer": 0, "byteOffset": 768, "byteLength": 72}
+  ],
+  "accessors": [
+    {"bufferView": 0, "componentType": 5126, "count": 24, "type": "VEC3"},
+    {"bufferView": 1, "componentType": 5126, "count": 24, "type": "VEC3"},
+    {"bufferView": 2, "componentType": 5126, "count": 24, "type": "VEC2"},
+    {"bufferView": 3, "componentType": 5123, "count": 36, "type": "SCALAR"}
+  ]
+}
