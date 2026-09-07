@@ -22,16 +22,16 @@ import java.time.Duration;
 import java.util.Optional;
 import java.util.logging.Logger;
 
-/** Headless entry point proving Beacon Garden's manifest-to-live-world startup path. */
-public final class BeaconGardenApplication {
+/** Developer-only scripted smoke test for Beacon Garden's manifest-to-live-world startup path. */
+public final class BeaconGardenHeadlessSmoke {
     private static final String ENGINE_VERSION = "0.1.0-SNAPSHOT";
-    private static final Logger LOGGER = Logger.getLogger(BeaconGardenApplication.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(BeaconGardenHeadlessSmoke.class.getName());
     private static final EntityId GARDEN_PLACEMENT = EntityId.from("cf795ee1-fe86-4b46-bbc1-b98ca9107fe5");
     private static final InputAction PULSE = new InputAction("pulse");
 
-    /** Prevents construction of this application entry point. */
-    private BeaconGardenApplication() {
-        throw new AssertionError("BeaconGardenApplication cannot be instantiated");
+    /** Prevents construction of this diagnostic entry point. */
+    private BeaconGardenHeadlessSmoke() {
+        throw new AssertionError("BeaconGardenHeadlessSmoke cannot be instantiated");
     }
 
     /**
@@ -47,7 +47,7 @@ public final class BeaconGardenApplication {
         Path publishedImports = projectRoot.resolve("target/import-cache");
         ProjectHost host = new ProjectRuntimeHost(
                 ENGINE_VERSION,
-                BeaconGardenApplication.class.getClassLoader(),
+                BeaconGardenHeadlessSmoke.class.getClassLoader(),
                 new StandardProjectEnvironment(publishedImports));
         HostedProject loaded = host.load(projectRoot);
         try (loaded) {
@@ -123,7 +123,7 @@ public final class BeaconGardenApplication {
     private static int entityCount(Entity root) {
         return 1
                 + root.children().stream()
-                        .mapToInt(BeaconGardenApplication::entityCount)
+                        .mapToInt(BeaconGardenHeadlessSmoke::entityCount)
                         .sum();
     }
 }

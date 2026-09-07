@@ -17,24 +17,14 @@ snapshot before building this repository:
 ./mvnw clean verify
 ```
 
-Run the build-time import publication followed by the headless startup path
-with:
+Run the build-time import publication followed by Beacon Garden's scripted
+headless integration smoke test with:
 
 ```shell
-./mvnw -q -Prun-headless process-classes
+./mvnw -q -Prun-headless test-compile
 ```
 
-Run the graphical project with:
-
-```shell
-./mvnw -q -Prun-desktop process-classes
-```
-
-Close the native window normally. Press Space or the south face button on the
-standard gamepad assigned to controller slot 0 to trigger the authored `pulse`
-action.
-
-The application should report six world roots, five live entities in the
+The smoke test should report six world roots, five live entities in the
 generated Garden instance, an active primary camera, two collision objects
 containing three independently authored shapes, and two entered overlaps
 identifying the Beacon sensor's two exact shape components. It should also
@@ -42,3 +32,15 @@ report the garden indicator changing from intensity `2.5` to `6.0`, the
 reusable Beacon instance's indicator changing from `0.0` to `1.5`, the pulse
 changing from pending to active at the phase boundary, and both world adapters
 closing.
+
+Run the graphical project through the engine's generic desktop launcher with:
+
+```shell
+./mvnw -q -Prun-desktop process-classes
+```
+
+Close the native window normally. Press Space or the south face button on the
+standard gamepad assigned to controller slot 0 to trigger the authored `pulse`
+action. The initially muted-green garden should become brighter green after the
+first pulse. The current pulse definition adds a persistent directional light,
+so it has no visible mesh, does not fade, and is spawned only once.

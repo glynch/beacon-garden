@@ -2,7 +2,7 @@
  * Copyright 2026 Graham Lynch
  * SPDX-License-Identifier: Apache-2.0
  */
-/** Beacon Garden application and project bootstrap. */
+/** Beacon Garden runtime extension and project-specific tooling. */
 module io.github.glynch.beacon.garden {
     requires java.logging;
     requires io.github.glynch.jscene3d.game;

@@ -257,20 +257,10 @@ final class ProjectHostIntegrationTest {
 
     /** Rejects invocation without the required project path before touching project state. */
     @Test
-    void rejectsMissingApplicationArgument() {
+    void rejectsMissingHeadlessSmokeArgument() {
         String[] arguments = {};
 
-        assertThatThrownBy(() -> BeaconGardenApplication.main(arguments))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("one Beacon Garden project-directory path");
-    }
-
-    /** Rejects desktop invocation without touching GLFW when the project path is absent. */
-    @Test
-    void rejectsMissingDesktopApplicationArgument() {
-        String[] arguments = {};
-
-        assertThatThrownBy(() -> BeaconGardenDesktopApplication.main(arguments))
+        assertThatThrownBy(() -> BeaconGardenHeadlessSmoke.main(arguments))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("one Beacon Garden project-directory path");
     }
@@ -285,12 +275,12 @@ final class ProjectHostIntegrationTest {
                 .hasMessageContaining("project-directory and import-cache");
     }
 
-    /** Runs the supported headless application entry point against the generic project host. */
+    /** Runs the scripted headless smoke entry point against the generic project host. */
     @Test
-    void runsHeadlessApplication() {
+    void runsHeadlessSmoke() {
         String[] arguments = {PROJECT_ROOT.toString()};
 
-        BeaconGardenApplication.main(arguments);
+        BeaconGardenHeadlessSmoke.main(arguments);
     }
 
     /** Identifies an invalid project manifest before scanning or composing content. */

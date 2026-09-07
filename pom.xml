@@ -164,8 +164,10 @@
                                         <argument>${jscene3d.example.firstThreadArgument}</argument>
                                         <argument>-classpath</argument>
                                         <classpath />
-                                        <argument>io.github.glynch.beacongarden.BeaconGardenDesktopApplication</argument>
+                                        <argument>io.github.glynch.jscene3d.project.desktop.DesktopProjectLauncher</argument>
+                                        <argument>${project.parent.version}</argument>
                                         <argument>${project.basedir}</argument>
+                                        <argument>${project.build.directory}/import-cache</argument>
                                     </arguments>
                                 </configuration>
                             </execution>
@@ -184,12 +186,13 @@
                         <executions>
                             <execution>
                                 <id>run-headless</id>
-                                <phase>process-classes</phase>
+                                <phase>test-compile</phase>
                                 <goals>
                                     <goal>java</goal>
                                 </goals>
                                 <configuration>
-                                    <mainClass>io.github.glynch.beacongarden.BeaconGardenApplication</mainClass>
+                                    <mainClass>io.github.glynch.beacongarden.BeaconGardenHeadlessSmoke</mainClass>
+                                    <classpathScope>test</classpathScope>
                                     <arguments>
                                         <argument>${project.basedir}</argument>
                                     </arguments>
