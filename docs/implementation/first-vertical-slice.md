@@ -1,6 +1,6 @@
 # Beacon Garden first vertical slice
 
-Status: recommended implementation sequence
+Status: implemented
 
 Beacon Garden is the first consumer of JScene3D's accepted
 [entity-component world architecture](../../../threejs-java/docs/design/entity-component-world-architecture.md).
@@ -30,6 +30,10 @@ directory and the engine can:
 9. deliver a typed signal to behavior that changes visible instance state;
 10. disable, re-enable, and destroy an owned entity subtree correctly;
 11. close the world without leaking runtime resources or backend handles.
+
+These acceptance points are implemented and exercised through focused engine
+tests, Beacon Garden's headless project-host integration tests, its graphical
+smoke path, and its relocated exported-application integration test.
 
 Invalid fixtures must demonstrate stable diagnostics for missing assets,
 definition cycles, component conflicts, unresolved required references,

@@ -39,10 +39,11 @@ final class ExportedApplicationImageIT {
         String launcher = Files.readString(relocated.resolve("bin/beacon-garden"), UTF_8);
 
         assertThat(exportedPaths)
-                .contains("project/project.json", "content/imports/garden-import/active-generation")
+                .contains("project/project.json", "project/LICENSE", "content/imports/garden-import/active-generation")
                 .noneMatch(path -> path.endsWith(".java"))
                 .doesNotContain("project/assets/garden.gltf", "project/pom.xml")
                 .noneMatch(path -> path.contains("jscene3d-gltf")
+                        || path.contains("jscene3d-project-export")
                         || path.contains("jgltf")
                         || path.contains("drako")
                         || path.contains("jspecify"));
@@ -54,7 +55,7 @@ final class ExportedApplicationImageIT {
                 .noneMatch(path -> path.contains("BeaconGardenHeadlessSmoke") || path.endsWith("Test.class"));
         assertThat(launcher)
                 .contains("io.github.glynch.jscene3d.project.desktop.DesktopProjectLauncher")
-                .doesNotContain("BeaconGardenHeadlessSmoke");
+                .doesNotContain("BeaconGardenHeadlessSmoke", "development/projects/beacon-garden");
 
         String output = runHeadlessProbe(relocated, temporaryDirectory);
 
