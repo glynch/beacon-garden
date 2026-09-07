@@ -65,5 +65,22 @@ glTF source, Maven files, or import tooling dependencies. The export integration
 test copies that directory to a temporary directory outside the source checkout
 and runs the project against only the relocated runtime files. This directory
 form uses the host platform's native libraries and requires an installed Java
-21 runtime; later native packaging can wrap the same engine-produced directory
-with a bundled runtime.
+21 runtime.
+
+Build and verify a macOS application image with:
+
+```shell
+./mvnw clean verify -Pexport-directory,export-macos-app
+```
+
+The engine-owned native exporter consumes the completed application directory
+and produces `target/export-native/Beacon Garden.app`. The image retains the
+generic `DesktopProjectLauncher`, packages the authored project and published
+content, and includes a Java 21 runtime, so the destination Mac does not need a
+separate Java installation. This first native format is built for the current
+macOS host and does not request a signing identity or notarization. Launch the
+generated image with:
+
+```shell
+open "target/export-native/Beacon Garden.app"
+```
