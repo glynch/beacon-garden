@@ -5,7 +5,8 @@
     "id": "io.github.glynch.beacon-garden",
     "name": "Beacon Garden",
     "version": "0.1.0",
-    "description": "A small interactive garden proving JScene3D project composition."
+    "description": "A small interactive garden proving JScene3D project composition.",
+    "icon": "branding/beacon-garden.icns"
   },
   "engine": {
     "requires": ">=0.1.0-SNAPSHOT <0.2.0",

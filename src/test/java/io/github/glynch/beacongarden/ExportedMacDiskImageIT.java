@@ -56,6 +56,8 @@ final class ExportedMacDiskImageIT {
         Path applicationRoot = image.resolve("Contents/app");
         Path launcher = image.resolve("Contents/MacOS/Beacon Garden");
         Path runtimeModules = image.resolve("Contents/runtime/Contents/Home/lib/modules");
+        Path nativeIcon = image.resolve("Contents/Resources/Beacon Garden.icns");
+        Path projectIcon = applicationRoot.resolve("project/branding/beacon-garden.icns");
         Path metadata = applicationRoot.resolve("application-image.properties");
         Path applicationsLink = image.resolveSibling("Applications");
 
@@ -64,6 +66,7 @@ final class ExportedMacDiskImageIT {
         assertThat(Files.readSymbolicLink(applicationsLink)).isEqualTo(Path.of("/Applications"));
         assertThat(launcher).isRegularFile().isExecutable();
         assertThat(runtimeModules).isRegularFile();
+        assertThat(nativeIcon).hasSameBinaryContentAs(projectIcon);
         assertThat(applicationRoot.resolve("project/project.json")).isRegularFile();
         assertThat(applicationRoot.resolve("content/imports/garden-import/active-generation"))
                 .isRegularFile();

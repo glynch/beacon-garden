@@ -34,6 +34,8 @@ final class ExportedMacApplicationImageIT {
         Path applicationRoot = image.resolve("Contents/app");
         Path launcher = image.resolve("Contents/MacOS/Beacon Garden");
         Path runtimeModules = image.resolve("Contents/runtime/Contents/Home/lib/modules");
+        Path nativeIcon = image.resolve("Contents/Resources/Beacon Garden.icns");
+        Path projectIcon = applicationRoot.resolve("project/branding/beacon-garden.icns");
         Path configuration = applicationRoot.resolve("Beacon Garden.cfg");
         List<String> exportedPaths = relativePaths(image);
         List<String> applicationEntries = jarEntries(applicationJar(applicationRoot));
@@ -41,7 +43,9 @@ final class ExportedMacApplicationImageIT {
         assertThat(exportedPaths)
                 .contains(
                         "Contents/MacOS/Beacon Garden",
+                        "Contents/Resources/Beacon Garden.icns",
                         "Contents/app/project/project.json",
+                        "Contents/app/project/branding/beacon-garden.icns",
                         "Contents/app/project/LICENSE",
                         "Contents/app/content/imports/garden-import/active-generation",
                         "Contents/runtime/Contents/Home/lib/modules")
@@ -69,6 +73,7 @@ final class ExportedMacApplicationImageIT {
                 .doesNotContain("BeaconGardenHeadlessSmoke", "development/projects/beacon-garden");
         assertThat(launcher).isRegularFile().isExecutable();
         assertThat(runtimeModules).isRegularFile();
+        assertThat(nativeIcon).hasSameBinaryContentAs(projectIcon);
     }
 
     /** Copies a complete application bundle while preserving runtime symbolic links. */
