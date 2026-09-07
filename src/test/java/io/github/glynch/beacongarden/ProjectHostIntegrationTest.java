@@ -15,6 +15,7 @@ import io.github.glynch.jscene3d.project.asset.AssetId;
 import io.github.glynch.jscene3d.project.asset.AssetKind;
 import io.github.glynch.jscene3d.project.component.ComponentId;
 import io.github.glynch.jscene3d.project.component.EndpointId;
+import io.github.glynch.jscene3d.project.desktop.StandardProjectEnvironment;
 import io.github.glynch.jscene3d.project.entity.EntityId;
 import io.github.glynch.jscene3d.project.extension.RegisteredType;
 import io.github.glynch.jscene3d.project.physics3d.CollisionShape3d;
@@ -264,6 +265,16 @@ final class ProjectHostIntegrationTest {
                 .hasMessageContaining("one Beacon Garden project-directory path");
     }
 
+    /** Rejects desktop invocation without touching GLFW when the project path is absent. */
+    @Test
+    void rejectsMissingDesktopApplicationArgument() {
+        String[] arguments = {};
+
+        assertThatThrownBy(() -> BeaconGardenDesktopApplication.main(arguments))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("one Beacon Garden project-directory path");
+    }
+
     /** Rejects build-time publication without both explicit filesystem locations. */
     @Test
     void rejectsMissingPublisherArguments() {
@@ -367,7 +378,7 @@ final class ProjectHostIntegrationTest {
         ProjectHost host = new ProjectRuntimeHost(
                 ENGINE_VERSION,
                 ProjectHostIntegrationTest.class.getClassLoader(),
-                new BeaconGardenEnvironment(cacheRoot));
+                new StandardProjectEnvironment(cacheRoot));
         return host.load(projectRoot);
     }
 

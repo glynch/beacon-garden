@@ -8,6 +8,7 @@ module io.github.glynch.beacon.garden {
     requires io.github.glynch.jscene3d.game;
     requires static io.github.glynch.jscene3d.gltf;
     requires io.github.glynch.jscene3d.project.importing;
+    requires io.github.glynch.jscene3d.project.desktop;
     requires io.github.glynch.jscene3d.project.physics3d;
     requires io.github.glynch.jscene3d.project.runtime;
     requires io.github.glynch.jscene3d.project.spatial3d;

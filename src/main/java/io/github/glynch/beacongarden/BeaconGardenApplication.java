@@ -8,6 +8,7 @@ import io.github.glynch.jscene3d.game.input.ActionSnapshot;
 import io.github.glynch.jscene3d.game.input.InputAction;
 import io.github.glynch.jscene3d.game.input.InputWorldModule;
 import io.github.glynch.jscene3d.game.input.ProjectInput;
+import io.github.glynch.jscene3d.project.desktop.StandardProjectEnvironment;
 import io.github.glynch.jscene3d.project.entity.EntityId;
 import io.github.glynch.jscene3d.project.physics3d.Physics3dWorldModule;
 import io.github.glynch.jscene3d.project.runtime.Entity;
@@ -47,7 +48,7 @@ public final class BeaconGardenApplication {
         ProjectHost host = new ProjectRuntimeHost(
                 ENGINE_VERSION,
                 BeaconGardenApplication.class.getClassLoader(),
-                new BeaconGardenEnvironment(publishedImports));
+                new StandardProjectEnvironment(publishedImports));
         HostedProject loaded = host.load(projectRoot);
         try (loaded) {
             Spatial3dWorldModule spatial = loaded.world().requireModule(Spatial3dWorldModule.class);

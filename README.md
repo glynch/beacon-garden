@@ -4,9 +4,10 @@ Beacon Garden is the first application built on JScene3D's hierarchical
 entity-component world architecture. The current slice loads the real project
 manifest and startup world, composes its authored camera, light, garden roots,
 reusable beacon definition, independently authored collision resources, and
-runtime behavior through headless adapters. Its Garden geometry is authored as
+runtime behavior through the standard project environment. Its Garden geometry is authored as
 glTF and published at build time as a generated read-only entity definition
-with immutable mesh and material resources.
+with immutable mesh and material resources. The same project data can run
+headlessly or through the generic native desktop host.
 
 JScene3D is currently consumed as a sibling source checkout. Install its current
 snapshot before building this repository:
@@ -22,6 +23,16 @@ with:
 ```shell
 ./mvnw -q -Prun-headless process-classes
 ```
+
+Run the graphical project with:
+
+```shell
+./mvnw -q -Prun-desktop process-classes
+```
+
+Close the native window normally. Press Space or the south face button on the
+standard gamepad assigned to controller slot 0 to trigger the authored `pulse`
+action.
 
 The application should report six world roots, five live entities in the
 generated Garden instance, an active primary camera, two collision objects
