@@ -5,6 +5,8 @@
 /** Beacon Garden application and project bootstrap. */
 module io.github.glynch.beacon.garden {
     requires java.logging;
+    requires io.github.glynch.jscene3d.project.importing;
+    requires io.github.glynch.jscene3d.project.physics3d;
     requires io.github.glynch.jscene3d.project.runtime;
     requires io.github.glynch.jscene3d.project.spatial3d;
     requires static org.jspecify;

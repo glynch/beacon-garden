@@ -21,6 +21,23 @@
       "requires": ">=0.1.0 <0.2.0"
     }
   ],
+  "assets": [
+    {
+      "id": "beacon-sensor-box",
+      "type": "io.github.glynch.jscene3d.physics3d/box-collision-shape-3d",
+      "path": "resources/beacon-sensor-box.resource.json"
+    },
+    {
+      "id": "beacon-sensor-sphere",
+      "type": "io.github.glynch.jscene3d.physics3d/sphere-collision-shape-3d",
+      "path": "resources/beacon-sensor-sphere.resource.json"
+    },
+    {
+      "id": "garden-overlap-target",
+      "type": "io.github.glynch.jscene3d.physics3d/box-collision-shape-3d",
+      "path": "resources/garden-overlap-target.resource.json"
+    }
+  ],
   "catalog": {
     "genres": ["exploration"],
     "tags": ["garden", "three-dimensional"],

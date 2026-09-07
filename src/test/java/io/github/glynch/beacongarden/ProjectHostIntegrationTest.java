@@ -9,21 +9,33 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import io.github.glynch.jscene3d.project.asset.AssetId;
 import io.github.glynch.jscene3d.project.asset.AssetKind;
+import io.github.glynch.jscene3d.project.component.ComponentId;
+import io.github.glynch.jscene3d.project.component.EndpointId;
 import io.github.glynch.jscene3d.project.entity.EntityId;
+import io.github.glynch.jscene3d.project.extension.RegisteredType;
+import io.github.glynch.jscene3d.project.physics3d.CollisionShape3d;
+import io.github.glynch.jscene3d.project.physics3d.CollisionShape3dResource;
+import io.github.glynch.jscene3d.project.physics3d.Physics3dWorldModule;
 import io.github.glynch.jscene3d.project.runtime.Entity;
 import io.github.glynch.jscene3d.project.runtime.HostedProject;
 import io.github.glynch.jscene3d.project.runtime.ProjectHost;
 import io.github.glynch.jscene3d.project.runtime.ProjectHostException;
 import io.github.glynch.jscene3d.project.runtime.ProjectRuntimeHost;
+import io.github.glynch.jscene3d.project.runtime.RuntimeAction;
 import io.github.glynch.jscene3d.project.runtime.RuntimeEntityId;
+import io.github.glynch.jscene3d.project.runtime.RuntimePayload;
+import io.github.glynch.jscene3d.project.runtime.RuntimePayloadAction;
+import io.github.glynch.jscene3d.project.runtime.RuntimeSignal;
 import io.github.glynch.jscene3d.project.runtime.SpawnStatus;
-import io.github.glynch.jscene3d.project.spatial3d.HeadlessSpatial3dEnvironment;
+import io.github.glynch.jscene3d.project.runtime.extension.ComponentEndpoints;
+import io.github.glynch.jscene3d.project.spatial3d.DirectionalLight3d;
 import io.github.glynch.jscene3d.project.spatial3d.Spatial3dWorldModule;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -32,6 +44,12 @@ final class ProjectHostIntegrationTest {
     private static final String ENGINE_VERSION = "0.1.0-SNAPSHOT";
     private static final AssetId BEACON_PULSE_ASSET = AssetId.from("d4c94a8e-678c-4438-bbef-2f92103f8149");
     private static final EntityId GARDEN_BEHAVIOR_ENTITY = EntityId.from("d19ae6cf-a8cd-437b-a00a-27dffdd903dd");
+    private static final EntityId BEACON_PLACEMENT = EntityId.from("e9f4ab33-c25f-4dc7-b08c-1de71a83175c");
+    private static final EntityId SUN_ENTITY = EntityId.from("e30e1867-444a-45c8-93ce-c8aaad2a1813");
+    private static final ComponentId SUN_LIGHT = ComponentId.from("224343e5-57fe-462f-9205-56f6ae1fd218");
+    private static final ComponentId BEACON_LIGHT = ComponentId.from("8c594962-2f31-4917-ab5f-56caa132a688");
+    private static final ComponentId SENSOR_BOX = ComponentId.from("4575ddab-ce91-4d79-84a1-14849cd6a792");
+    private static final ComponentId SENSOR_SPHERE = ComponentId.from("6b7d9fd9-d036-40d9-8528-a179c3f08390");
     private static final Path PROJECT_ROOT = Path.of(System.getProperty("beaconGarden.projectRoot", "."))
             .toAbsolutePath()
             .normalize();
@@ -44,6 +62,7 @@ final class ProjectHostIntegrationTest {
     void loadsAndActivatesStartupWorld() {
         HostedProject loaded = load(PROJECT_ROOT);
         Spatial3dWorldModule spatial = loaded.world().requireModule(Spatial3dWorldModule.class);
+        Physics3dWorldModule physics = loaded.world().requireModule(Physics3dWorldModule.class);
 
         assertThat(loaded.project().identity().id()).isEqualTo("io.github.glynch.beacon-garden");
         assertThat(loaded.assets().assets())
@@ -51,9 +70,11 @@ final class ProjectHostIntegrationTest {
                 .containsExactly(AssetKind.ENTITY_DEFINITION, AssetKind.ENTITY_DEFINITION, AssetKind.WORLD_DEFINITION);
         assertThat(loaded.world().roots())
                 .extracting(entity -> entity.name().orElseThrow())
-                .containsExactly("Camera", "Sun", "Garden", "Beacon A", "Garden Behavior");
+                .containsExactly("Camera", "Sun", "Garden", "Garden Overlap Target", "Beacon A", "Garden Behavior");
         assertThat(loaded.world().isActive()).isFalse();
         assertThat(spatial.isReadyToRender()).isFalse();
+        assertThat(physics.collisionObjectCount()).isEqualTo(2);
+        assertThat(physics.collisionShapeCount()).isEqualTo(3);
 
         loaded.world().activate();
 
@@ -62,6 +83,62 @@ final class ProjectHostIntegrationTest {
         loaded.close();
         assertThat(loaded.world().isClosed()).isTrue();
         assertThat(spatial.isClosed()).isTrue();
+        assertThat(physics.isClosed()).isTrue();
+    }
+
+    /** Delivers both authored Beacon shape overlaps and changes the referenced light instance. */
+    @Test
+    void handlesAuthoredMultiShapeOverlap() {
+        HostedProject loaded = load(PROJECT_ROOT);
+        Entity behaviorEntity = authoredRoot(loaded, GARDEN_BEHAVIOR_ENTITY);
+        GardenBehavior behavior = behaviorEntity
+                .component(GardenBehavior.COMPONENT_ID, GardenBehavior.class)
+                .orElseThrow();
+        DirectionalLight3d indicator = authoredRoot(loaded, SUN_ENTITY)
+                .component(SUN_LIGHT, DirectionalLight3d.class)
+                .orElseThrow();
+        Entity beacon = authoredRoot(loaded, BEACON_PLACEMENT);
+        DirectionalLight3d beaconIndicator =
+                beacon.component(BEACON_LIGHT, DirectionalLight3d.class).orElseThrow();
+        BeaconResponse beaconResponse = beacon.component(BeaconResponse.COMPONENT_ID, BeaconResponse.class)
+                .orElseThrow();
+        CollisionShape3dResource sensorResource;
+        try (loaded) {
+            sensorResource = beacon.component(SENSOR_BOX, CollisionShape3d.class)
+                    .orElseThrow()
+                    .resource();
+            assertThat(indicator.intensity()).isEqualTo(2.5F);
+            assertThat(beaconIndicator.intensity()).isZero();
+            assertThat(behavior.enteredOverlaps()).isEmpty();
+            assertThat(beaconResponse.overlaps()).isEmpty();
+
+            loaded.world().activate();
+            loaded.world().advanceFixed(Duration.ofMillis(16L));
+
+            assertThat(behavior.enteredOverlaps()).hasSize(2);
+            assertThat(behavior.enteredSensorShapeIds()).containsExactlyInAnyOrder(SENSOR_BOX, SENSOR_SPHERE);
+            assertThat(indicator.intensity()).isEqualTo(6.0F);
+            assertThat(beaconResponse.overlaps()).hasSize(2);
+            assertThat(beaconResponse.indicatorIntensity()).isEqualTo(1.5F);
+            assertThat(sensorResource.isClosed()).isFalse();
+        }
+        assertThat(sensorResource.isClosed()).isTrue();
+    }
+
+    /** Rejects a payload whose runtime value violates the descriptor-declared overlap contract. */
+    @Test
+    void rejectsInvalidBeaconOverlapPayload() {
+        BeaconResponse response = new BeaconResponse();
+        CapturingComponentEndpoints endpoints = new CapturingComponentEndpoints();
+        response.bindEndpoints(endpoints);
+        RuntimePayload invalidPayload =
+                new RuntimePayload(new RegisteredType("io.github.glynch.beacon-garden/invalid-payload", 1), "invalid");
+
+        RuntimePayloadAction payloadAction = endpoints.payloadAction();
+
+        assertThatThrownBy(() -> payloadAction.execute(invalidPayload))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("CollisionOverlap3d");
     }
 
     /** Discovers the manifest-selected application provider and prepares its authored pulse dependency. */
@@ -214,13 +291,14 @@ final class ProjectHostIntegrationTest {
     /** Creates the same generic host that an editor preview or exported launcher supplies. */
     private static HostedProject load(Path projectRoot) {
         ProjectHost host = new ProjectRuntimeHost(
-                ENGINE_VERSION, ProjectHostIntegrationTest.class.getClassLoader(), new HeadlessSpatial3dEnvironment());
+                ENGINE_VERSION, ProjectHostIntegrationTest.class.getClassLoader(), new BeaconGardenEnvironment());
         return host.load(projectRoot);
     }
 
     /** Copies the authored project documents into the test's isolated directory. */
     private void copyProject() throws IOException {
         Files.createDirectories(temporaryDirectory.resolve("entities"));
+        Files.createDirectories(temporaryDirectory.resolve("resources"));
         Files.createDirectories(temporaryDirectory.resolve("worlds"));
         Files.copy(PROJECT_ROOT.resolve("project.json"), temporaryDirectory.resolve("project.json"));
         Files.copy(
@@ -229,6 +307,15 @@ final class ProjectHostIntegrationTest {
         Files.copy(
                 PROJECT_ROOT.resolve("entities/beacon-pulse.entity.json"),
                 temporaryDirectory.resolve("entities/beacon-pulse.entity.json"));
+        Files.copy(
+                PROJECT_ROOT.resolve("resources/beacon-sensor-box.resource.json"),
+                temporaryDirectory.resolve("resources/beacon-sensor-box.resource.json"));
+        Files.copy(
+                PROJECT_ROOT.resolve("resources/beacon-sensor-sphere.resource.json"),
+                temporaryDirectory.resolve("resources/beacon-sensor-sphere.resource.json"));
+        Files.copy(
+                PROJECT_ROOT.resolve("resources/garden-overlap-target.resource.json"),
+                temporaryDirectory.resolve("resources/garden-overlap-target.resource.json"));
         Files.copy(
                 PROJECT_ROOT.resolve("worlds/garden.world.json"),
                 temporaryDirectory.resolve("worlds/garden.world.json"));
@@ -246,5 +333,30 @@ final class ProjectHostIntegrationTest {
                 .filter(entity -> entity.authoredId().equals(authoredId))
                 .findFirst()
                 .orElseThrow();
+    }
+
+    /** Captures the payload-bearing endpoint installed by a component under test. */
+    private static final class CapturingComponentEndpoints implements ComponentEndpoints {
+        private Optional<RuntimePayloadAction> payloadAction = Optional.empty();
+
+        private RuntimePayloadAction payloadAction() {
+            return payloadAction.orElseThrow();
+        }
+
+        @Override
+        public RuntimeSignal signal(EndpointId endpoint) {
+            throw new UnsupportedOperationException("no signal expected");
+        }
+
+        @Override
+        public void action(EndpointId endpoint, RuntimeAction action) {
+            throw new UnsupportedOperationException("no payload-free action expected");
+        }
+
+        @Override
+        public void action(EndpointId endpoint, RuntimePayloadAction action) {
+            assertThat(endpoint).isEqualTo(BeaconResponse.RECEIVE_OVERLAP);
+            payloadAction = Optional.of(action);
+        }
     }
 }

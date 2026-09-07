@@ -4,12 +4,12 @@
  */
 package io.github.glynch.beacongarden;
 
+import io.github.glynch.jscene3d.project.physics3d.Physics3dWorldModule;
 import io.github.glynch.jscene3d.project.runtime.Entity;
 import io.github.glynch.jscene3d.project.runtime.HostedProject;
 import io.github.glynch.jscene3d.project.runtime.ProjectHost;
 import io.github.glynch.jscene3d.project.runtime.ProjectRuntimeHost;
 import io.github.glynch.jscene3d.project.runtime.SpawnOperation;
-import io.github.glynch.jscene3d.project.spatial3d.HeadlessSpatial3dEnvironment;
 import io.github.glynch.jscene3d.project.spatial3d.Spatial3dWorldModule;
 import java.nio.file.Path;
 import java.time.Duration;
@@ -37,15 +37,21 @@ public final class BeaconGardenApplication {
         }
         Path projectRoot = Path.of(arguments[0]).toAbsolutePath().normalize();
         ProjectHost host = new ProjectRuntimeHost(
-                ENGINE_VERSION, BeaconGardenApplication.class.getClassLoader(), new HeadlessSpatial3dEnvironment());
+                ENGINE_VERSION, BeaconGardenApplication.class.getClassLoader(), new BeaconGardenEnvironment());
         HostedProject loaded = host.load(projectRoot);
         try (loaded) {
             Spatial3dWorldModule spatial = loaded.world().requireModule(Spatial3dWorldModule.class);
+            Physics3dWorldModule physics = loaded.world().requireModule(Physics3dWorldModule.class);
             GardenBehavior behavior = gardenBehavior(loaded);
+            BeaconResponse beaconResponse = beaconResponse(loaded);
             loaded.world().activate();
             LOGGER.info(() -> "Loaded project = " + loaded.project().identity().name());
             LOGGER.info(() -> "World roots = " + loaded.world().roots().size());
             LOGGER.info(() -> "Primary camera active = " + spatial.isReadyToRender());
+            LOGGER.info(() -> "Collision objects = " + physics.collisionObjectCount() + ", shapes = "
+                    + physics.collisionShapeCount());
+            float indicatorBeforeOverlap = behavior.indicatorIntensity();
+            float beaconIndicatorBeforeOverlap = beaconResponse.indicatorIntensity();
             loaded.world().advanceFixed(Duration.ofMillis(16L));
             SpawnOperation pulseSpawn = behavior.pulseSpawn();
             Entity pulse = pulseSpawn.entity().orElseThrow();
@@ -54,11 +60,18 @@ public final class BeaconGardenApplication {
             LOGGER.info(() -> "Pulse status after boundary = " + pulseSpawn.status());
             LOGGER.info(
                     () -> "Runtime pulse children = " + pulseOwner.children().size());
+            LOGGER.info(() -> "Entered overlaps = " + behavior.enteredOverlaps().size() + ", sensor shapes = "
+                    + behavior.enteredSensorShapeIds());
+            LOGGER.info(
+                    () -> "Indicator intensity = " + indicatorBeforeOverlap + " -> " + behavior.indicatorIntensity());
+            LOGGER.info(() -> "Beacon indicator intensity = " + beaconIndicatorBeforeOverlap + " -> "
+                    + beaconResponse.indicatorIntensity());
             loaded.world().destroy(pulse);
             LOGGER.info(() -> "Pulse destroyed = " + pulse.isDestroyed() + ", runtime pulse children = "
                     + pulseOwner.children().size());
             loaded.close();
-            LOGGER.info(() -> "Spatial adapter closed = " + spatial.isClosed());
+            LOGGER.info(() -> "Physics adapter closed = " + physics.isClosed() + ", spatial adapter closed = "
+                    + spatial.isClosed());
         }
     }
 
@@ -69,5 +82,14 @@ public final class BeaconGardenApplication {
                 .flatMap(Optional::stream)
                 .findFirst()
                 .orElseThrow(() -> new IllegalStateException("startup world has no Garden Behavior component"));
+    }
+
+    /** Finds the response component inside the placed reusable Beacon definition. */
+    private static BeaconResponse beaconResponse(HostedProject loaded) {
+        return loaded.world().roots().stream()
+                .map(entity -> entity.component(BeaconResponse.COMPONENT_ID, BeaconResponse.class))
+                .flatMap(Optional::stream)
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException("startup world has no Beacon Response component"));
     }
 }

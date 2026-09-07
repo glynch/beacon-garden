@@ -42,6 +42,7 @@ public final class BeaconGardenRuntimeExtension implements ApplicationRuntimeExt
                         context.spawnTarget(),
                         pulseDefinition(Objects.requireNonNull(
                                 context.properties().get(PULSE_DEFINITION), "pulse-definition"))));
+        validRegistry.register(BeaconResponse.TYPE, context -> new BeaconResponse());
     }
 
     @Override

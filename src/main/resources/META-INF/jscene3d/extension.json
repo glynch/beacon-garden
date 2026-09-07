@@ -12,7 +12,7 @@
       "id": "io.github.glynch.beacon-garden/garden-behavior",
       "typeVersion": 1,
       "displayName": "Garden Behavior",
-      "description": "Coordinates Beacon Garden's runtime-created pulse.",
+      "description": "Coordinates the runtime-created pulse and Beacon overlap response.",
       "properties": [
         {
           "id": "pulse-definition",
@@ -21,9 +21,53 @@
           "displayName": "Pulse Definition",
           "description": "Entity definition spawned when this behavior first updates.",
           "acceptedReferences": ["asset"]
+        },
+        {
+          "id": "indicator-light",
+          "valueKind": "component_target",
+          "required": true,
+          "displayName": "Indicator Light",
+          "description": "Authored directional light changed when the Beacon sensor overlaps a body."
+        }
+      ],
+      "actions": [
+        {
+          "id": "receive-overlap",
+          "payload": {
+            "type": "io.github.glynch.jscene3d.physics3d/collision-overlap-3d",
+            "typeVersion": 1
+          },
+          "displayName": "Receive Overlap",
+          "description": "Receives a precise Beacon sensor overlap."
         }
       ],
       "updatePhases": ["before-physics"]
+    },
+    {
+      "id": "io.github.glynch.beacon-garden/beacon-response",
+      "typeVersion": 1,
+      "displayName": "Beacon Response",
+      "description": "Changes one Beacon instance's indicator when its sensor overlaps another body.",
+      "properties": [
+        {
+          "id": "indicator-light",
+          "valueKind": "component_target",
+          "required": true,
+          "displayName": "Indicator Light",
+          "description": "Directional light owned by the same reusable Beacon instance."
+        }
+      ],
+      "actions": [
+        {
+          "id": "receive-overlap",
+          "payload": {
+            "type": "io.github.glynch.jscene3d.physics3d/collision-overlap-3d",
+            "typeVersion": 1
+          },
+          "displayName": "Receive Overlap",
+          "description": "Makes this Beacon instance visibly active."
+        }
+      ]
     }
   ]
 }

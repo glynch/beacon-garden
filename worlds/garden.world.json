@@ -4,7 +4,19 @@
   "assetType": "world-definition",
   "formatVersion": 1,
   "name": "Garden World",
-  "connections": [],
+  "connections": [
+    {
+      "signal": {
+        "entityId": "e9f4ab33-c25f-4dc7-b08c-1de71a83175c",
+        "endpointId": "overlap-entered"
+      },
+      "action": {
+        "entityId": "d19ae6cf-a8cd-437b-a00a-27dffdd903dd",
+        "componentId": "fd201861-8733-41ba-b28e-bd234badd1f1",
+        "endpointId": "receive-overlap"
+      }
+    }
+  ],
   "roots": [
     {
       "entryType": "local",
@@ -77,6 +89,46 @@
       "children": []
     },
     {
+      "entryType": "local",
+      "entityId": "43730ad8-6ab8-43b6-b8e5-84c778402415",
+      "name": "Garden Overlap Target",
+      "enabled": true,
+      "components": [
+        {
+          "componentId": "6d47d527-a296-495d-a58a-46617905b46a",
+          "type": "io.github.glynch.jscene3d.spatial3d/transform-3d",
+          "typeVersion": 1,
+          "properties": {
+            "position": [0, 0, 0]
+          }
+        },
+        {
+          "componentId": "1b638760-a048-430c-9140-38fc7bed9b02",
+          "type": "io.github.glynch.jscene3d.physics3d/collision-shape-3d",
+          "typeVersion": 1,
+          "properties": {
+            "shape": {"$ref": "asset:garden-overlap-target"}
+          }
+        },
+        {
+          "componentId": "ed2c5819-9228-45af-8fd1-7346461fe4cd",
+          "type": "io.github.glynch.jscene3d.physics3d/static-body-3d",
+          "typeVersion": 1,
+          "properties": {
+            "shapes": [
+              {
+                "$target": {
+                  "entityId": "43730ad8-6ab8-43b6-b8e5-84c778402415",
+                  "componentId": "1b638760-a048-430c-9140-38fc7bed9b02"
+                }
+              }
+            ]
+          }
+        }
+      ],
+      "children": []
+    },
+    {
       "entryType": "placement",
       "entityId": "e9f4ab33-c25f-4dc7-b08c-1de71a83175c",
       "name": "Beacon A",
@@ -100,6 +152,12 @@
           "properties": {
             "pulse-definition": {
               "$ref": "asset:d4c94a8e-678c-4438-bbef-2f92103f8149"
+            },
+            "indicator-light": {
+              "$target": {
+                "entityId": "e30e1867-444a-45c8-93ce-c8aaad2a1813",
+                "componentId": "224343e5-57fe-462f-9205-56f6ae1fd218"
+              }
             }
           }
         }

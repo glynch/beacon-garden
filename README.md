@@ -3,8 +3,8 @@
 Beacon Garden is the first application built on JScene3D's hierarchical
 entity-component world architecture. The current slice loads the real project
 manifest and startup world, composes its authored camera, light, garden roots,
-and reusable beacon definition, then exercises activation and cleanup through
-headless adapters.
+reusable beacon definition, independently authored collision resources, and
+runtime behavior through headless adapters.
 
 JScene3D is currently consumed as a sibling source checkout. Install its current
 snapshot before building this repository:
@@ -20,7 +20,9 @@ Run the headless startup path with:
 ./mvnw -q -Prun-headless compile
 ```
 
-The application should report that it loaded five world roots, activated a
-primary camera, observed the pulse spawn as pending during its requesting
-callback and active after the phase boundary, then destroyed that runtime child
-and closed the spatial adapter.
+The application should report six world roots, an active primary camera, two
+collision objects containing three shapes, and two entered overlaps identifying
+the Beacon sensor's two exact shape components. It should also report the
+garden indicator changing from intensity `2.5` to `6.0`, the reusable Beacon
+instance's indicator changing from `0.0` to `1.5`, the pulse changing from
+pending to active at the phase boundary, and both world adapters closing.

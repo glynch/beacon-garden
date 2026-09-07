@@ -6,13 +6,39 @@
   "name": "Beacon",
   "contract": {
     "parameters": [],
-    "signals": [],
+    "signals": [
+      {
+        "id": "overlap-entered",
+        "payload": {
+          "id": "io.github.glynch.jscene3d.physics3d/collision-overlap-3d",
+          "version": 1
+        },
+        "target": {
+          "entityId": "b0c0014b-2c02-4407-a797-cc5c98d790d5",
+          "componentId": "e20fc727-1199-4340-8edf-fd0c7ee79c78",
+          "endpointId": "overlap-entered"
+        }
+      }
+    ],
     "actions": [],
     "capabilities": [],
     "attachments": [],
     "resourceBindings": []
   },
-  "connections": [],
+  "connections": [
+    {
+      "signal": {
+        "entityId": "b0c0014b-2c02-4407-a797-cc5c98d790d5",
+        "componentId": "e20fc727-1199-4340-8edf-fd0c7ee79c78",
+        "endpointId": "overlap-entered"
+      },
+      "action": {
+        "entityId": "b0c0014b-2c02-4407-a797-cc5c98d790d5",
+        "componentId": "d41453ab-d987-4dd4-a8e6-6f3a8e2ee8d4",
+        "endpointId": "receive-overlap"
+      }
+    }
+  ],
   "root": {
     "entryType": "local",
     "entityId": "b0c0014b-2c02-4407-a797-cc5c98d790d5",
@@ -25,6 +51,68 @@
         "typeVersion": 1,
         "properties": {
           "position": [0, 0, 0]
+        }
+      },
+      {
+        "componentId": "8c594962-2f31-4917-ab5f-56caa132a688",
+        "type": "io.github.glynch.jscene3d.spatial3d/directional-light-3d",
+        "typeVersion": 1,
+        "properties": {
+          "color": [0.2, 0.65, 1.0],
+          "intensity": 0.0,
+          "target": [0, 0, -1]
+        }
+      },
+      {
+        "componentId": "4575ddab-ce91-4d79-84a1-14849cd6a792",
+        "type": "io.github.glynch.jscene3d.physics3d/collision-shape-3d",
+        "typeVersion": 1,
+        "properties": {
+          "shape": {"$ref": "asset:beacon-sensor-box"},
+          "local-position": [-0.5, 0, 0]
+        }
+      },
+      {
+        "componentId": "6b7d9fd9-d036-40d9-8528-a179c3f08390",
+        "type": "io.github.glynch.jscene3d.physics3d/collision-shape-3d",
+        "typeVersion": 1,
+        "properties": {
+          "shape": {"$ref": "asset:beacon-sensor-sphere"},
+          "local-position": [0.5, 0, 0]
+        }
+      },
+      {
+        "componentId": "e20fc727-1199-4340-8edf-fd0c7ee79c78",
+        "type": "io.github.glynch.jscene3d.physics3d/collision-sensor-3d",
+        "typeVersion": 1,
+        "properties": {
+          "shapes": [
+            {
+              "$target": {
+                "entityId": "b0c0014b-2c02-4407-a797-cc5c98d790d5",
+                "componentId": "4575ddab-ce91-4d79-84a1-14849cd6a792"
+              }
+            },
+            {
+              "$target": {
+                "entityId": "b0c0014b-2c02-4407-a797-cc5c98d790d5",
+                "componentId": "6b7d9fd9-d036-40d9-8528-a179c3f08390"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "componentId": "d41453ab-d987-4dd4-a8e6-6f3a8e2ee8d4",
+        "type": "io.github.glynch.beacon-garden/beacon-response",
+        "typeVersion": 1,
+        "properties": {
+          "indicator-light": {
+            "$target": {
+              "entityId": "b0c0014b-2c02-4407-a797-cc5c98d790d5",
+              "componentId": "8c594962-2f31-4917-ab5f-56caa132a688"
+            }
+          }
         }
       }
     ],
