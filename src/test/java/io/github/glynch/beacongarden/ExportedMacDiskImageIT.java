@@ -52,13 +52,16 @@ final class ExportedMacDiskImageIT {
     }
 
     /** Verifies the application directly on the read-only mounted volume without starting it. */
-    private static void verifyMountedApplication(Path image) {
+    private static void verifyMountedApplication(Path image) throws IOException {
         Path applicationRoot = image.resolve("Contents/app");
         Path launcher = image.resolve("Contents/MacOS/Beacon Garden");
         Path runtimeModules = image.resolve("Contents/runtime/Contents/Home/lib/modules");
         Path metadata = applicationRoot.resolve("application-image.properties");
+        Path applicationsLink = image.resolveSibling("Applications");
 
         assertThat(image).isDirectory();
+        assertThat(applicationsLink).isSymbolicLink();
+        assertThat(Files.readSymbolicLink(applicationsLink)).isEqualTo(Path.of("/Applications"));
         assertThat(launcher).isRegularFile().isExecutable();
         assertThat(runtimeModules).isRegularFile();
         assertThat(applicationRoot.resolve("project/project.json")).isRegularFile();

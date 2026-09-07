@@ -90,10 +90,12 @@ Build a macOS disk image from that completed application image with:
 
 The engine-owned disk-image exporter reads the application name and native
 version embedded in the `.app`; the build does not repeat or reconstruct that
-identity. It passes the completed application image to `jpackage`, then
-transactionally installs `target/distributions/Beacon Garden-1.0.0.dmg`.
-Signing and notarization remain outside this slice. Open the generated disk
-image with:
+identity. It stages the completed application image and an `/Applications`
+symbolic link, creates the compressed image directly with `hdiutil`, then
+transactionally installs `target/distributions/Beacon Garden-1.0.0.dmg`. DMG
+assembly does not invoke Finder or AppleScript, so it uses the same
+non-interactive path locally and on a macOS CI runner. Signing and notarization
+remain outside this slice. Open the generated disk image with:
 
 ```shell
 open "target/distributions/Beacon Garden-1.0.0.dmg"
