@@ -19,9 +19,9 @@ import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
-/** Verifies the assembled application using only a relocated runtime image. */
-final class ExportedApplicationImageIT {
-    private static final String APPLICATION_IMAGE_PROPERTY = "beaconGarden.applicationImage";
+/** Verifies the assembled application using only a relocated application directory. */
+final class ExportedApplicationDirectoryIT {
+    private static final String APPLICATION_DIRECTORY_PROPERTY = "beaconGarden.applicationDirectory";
     private static final String TEST_CLASSES_PROPERTY = "beaconGarden.testClasses";
 
     @TempDir
@@ -29,9 +29,9 @@ final class ExportedApplicationImageIT {
 
     /** Proves that the exported application is complete, relocatable, and free of development-only content. */
     @Test
-    void runsRelocatedRuntimeImage() throws IOException, InterruptedException {
+    void runsRelocatedApplicationDirectory() throws IOException, InterruptedException {
         Path relocated = temporaryDirectory.resolve("Beacon Garden");
-        copyTree(requiredPath(APPLICATION_IMAGE_PROPERTY), relocated);
+        copyTree(requiredPath(APPLICATION_DIRECTORY_PROPERTY), relocated);
 
         List<String> exportedPaths = relativePaths(relocated);
         Path applicationJar = applicationJar(relocated.resolve("lib"));
@@ -69,7 +69,7 @@ final class ExportedApplicationImageIT {
                         "Physics adapter closed = true, spatial adapter closed = true");
     }
 
-    /** Copies the assembled image so its original repository location cannot satisfy runtime paths. */
+    /** Copies the assembled directory so its original repository location cannot satisfy runtime paths. */
     private static void copyTree(Path source, Path destination) throws IOException {
         try (Stream<Path> paths = Files.walk(source)) {
             for (Path path : paths.toList()) {
@@ -83,20 +83,20 @@ final class ExportedApplicationImageIT {
         }
     }
 
-    /** Runs the test-only probe with application and engine classes supplied solely by the relocated image. */
-    private static String runHeadlessProbe(Path applicationImage, Path workingDirectory)
+    /** Runs the test-only probe with application and engine classes supplied solely by the relocated directory. */
+    private static String runHeadlessProbe(Path applicationDirectory, Path workingDirectory)
             throws IOException, InterruptedException {
         Path javaExecutable = Path.of(System.getProperty("java.home"), "bin", "java");
         String classPath = requiredPath(TEST_CLASSES_PROPERTY)
                 + System.getProperty("path.separator")
-                + applicationImage.resolve("lib/*");
+                + applicationDirectory.resolve("lib/*");
         Process process = new ProcessBuilder(
                         javaExecutable.toString(),
                         "-classpath",
                         classPath,
                         BeaconGardenHeadlessSmoke.class.getName(),
-                        applicationImage.resolve("project").toString(),
-                        applicationImage.resolve("content").toString())
+                        applicationDirectory.resolve("project").toString(),
+                        applicationDirectory.resolve("content").toString())
                 .directory(workingDirectory.toFile())
                 .redirectErrorStream(true)
                 .start();
@@ -111,7 +111,7 @@ final class ExportedApplicationImageIT {
         return output;
     }
 
-    /** Returns every path below the application image using portable separators. */
+    /** Returns every path below the application directory using portable separators. */
     private static List<String> relativePaths(Path root) throws IOException {
         try (Stream<Path> paths = Files.walk(root)) {
             return paths.filter(path -> !path.equals(root))

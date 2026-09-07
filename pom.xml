@@ -14,7 +14,7 @@
     <description>First playable consumer of the JScene3D entity-component world architecture.</description>
 
     <properties>
-        <beacon.garden.application.image>${project.build.directory}/export/beacon-garden</beacon.garden.application.image>
+        <beacon.garden.application.directory>${project.build.directory}/export/beacon-garden</beacon.garden.application.directory>
         <jscene3d.coverage.branch.minimum>0.70</jscene3d.coverage.branch.minimum>
         <jscene3d.coverage.line.minimum>0.85</jscene3d.coverage.line.minimum>
         <maven.deploy.skip>true</maven.deploy.skip>
@@ -250,13 +250,13 @@
                         <artifactId>exec-maven-plugin</artifactId>
                         <executions>
                             <execution>
-                                <id>assemble-exported-application-image</id>
+                                <id>assemble-exported-application-directory</id>
                                 <phase>package</phase>
                                 <goals>
                                     <goal>java</goal>
                                 </goals>
                                 <configuration>
-                                    <mainClass>io.github.glynch.jscene3d.project.exporting.internal.ApplicationImageExportCommand</mainClass>
+                                    <mainClass>io.github.glynch.jscene3d.project.exporting.internal.ApplicationDirectoryExportCommand</mainClass>
                                     <classpathScope>compile</classpathScope>
                                     <arguments>
                                         <argument>${project.parent.version}</argument>
@@ -265,7 +265,7 @@
                                         <argument>${project.build.directory}/import-cache</argument>
                                         <argument>${project.build.directory}/export-runtime</argument>
                                         <argument>${project.build.directory}/${project.build.finalName}.jar</argument>
-                                        <argument>${beacon.garden.application.image}</argument>
+                                        <argument>${beacon.garden.application.directory}</argument>
                                         <argument>${jscene3d.example.firstThreadArgument}</argument>
                                     </arguments>
                                 </configuration>
@@ -277,17 +277,17 @@
                         <artifactId>maven-failsafe-plugin</artifactId>
                         <executions>
                             <execution>
-                                <id>verify-exported-application</id>
+                                <id>verify-exported-application-directory</id>
                                 <goals>
                                     <goal>integration-test</goal>
                                     <goal>verify</goal>
                                 </goals>
                                 <configuration>
                                     <includes>
-                                        <include>**/ExportedApplicationImageIT.java</include>
+                                        <include>**/ExportedApplicationDirectoryIT.java</include>
                                     </includes>
                                     <systemPropertyVariables>
-                                        <beaconGarden.applicationImage>${beacon.garden.application.image}</beaconGarden.applicationImage>
+                                        <beaconGarden.applicationDirectory>${beacon.garden.application.directory}</beaconGarden.applicationDirectory>
                                         <beaconGarden.testClasses>${project.build.testOutputDirectory}</beaconGarden.testClasses>
                                     </systemPropertyVariables>
                                 </configuration>

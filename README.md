@@ -55,14 +55,15 @@ Build and verify a relocatable application directory with:
 
 The engine-owned project exporter produces the resulting
 `target/export/beacon-garden` directory from the authored project, published
-imports, and Maven-resolved runtime JARs. Maven does not define the image
-layout or generate its launchers. The image contains the application JAR,
-engine and third-party runtime JARs, host-selected LWJGL natives, runtime
-project JSON, published import artifacts, and generic desktop launch scripts.
+imports, and Maven-resolved runtime JARs. Maven does not define the directory
+layout or generate its launchers. The application directory contains the
+application JAR, engine and third-party runtime JARs, host-selected LWJGL
+natives, runtime project JSON, published import artifacts, and generic desktop
+launch scripts.
 It deliberately contains no Java sources, tests, headless smoke launcher, raw
 glTF source, Maven files, or import tooling dependencies. The export integration
-test copies that image to a temporary directory outside the source checkout and
-runs the project against only the relocated runtime files. This directory form
-uses the host platform's native libraries and requires an installed Java 21
-runtime; later native packaging can wrap the same engine-produced image with a
-bundled runtime.
+test copies that directory to a temporary directory outside the source checkout
+and runs the project against only the relocated runtime files. This directory
+form uses the host platform's native libraries and requires an installed Java
+21 runtime; later native packaging can wrap the same engine-produced directory
+with a bundled runtime.
