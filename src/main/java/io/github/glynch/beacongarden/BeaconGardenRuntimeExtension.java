@@ -13,7 +13,6 @@ import io.github.glynch.jscene3d.project.entity.EntityDefinition;
 import io.github.glynch.jscene3d.project.runtime.HostedProject;
 import io.github.glynch.jscene3d.project.runtime.extension.ApplicationRuntimeExtension;
 import io.github.glynch.jscene3d.project.runtime.extension.ComponentFactoryRegistry;
-import io.github.glynch.jscene3d.project.value.ProjectValue;
 import io.github.glynch.jscene3d.project.value.ResourceReference;
 import java.util.Objects;
 import java.util.Optional;
@@ -43,10 +42,9 @@ public final class BeaconGardenRuntimeExtension implements ApplicationRuntimeExt
                 GardenBehavior.TYPE,
                 context -> new GardenBehavior(
                         context.spawnTarget(),
-                        pulseDefinition(
-                                Objects.requireNonNull(context.properties().get(PULSE_DEFINITION), "pulse-definition")),
+                        pulseDefinition(context.properties().resourceReference(PULSE_DEFINITION)),
                         context.world().requireModule(InputWorldModule.class),
-                        inputAction(Objects.requireNonNull(context.properties().get(PULSE_ACTION), "pulse-action"))));
+                        new InputAction(context.properties().text(PULSE_ACTION))));
         validRegistry.register(BeaconResponse.TYPE, context -> new BeaconResponse());
     }
 
@@ -60,19 +58,10 @@ public final class BeaconGardenRuntimeExtension implements ApplicationRuntimeExt
     }
 
     /** Converts one descriptor-validated asset reference into a typed entity-definition reference. */
-    private static AssetRef<EntityDefinition> pulseDefinition(ProjectValue value) {
-        if (!(value instanceof ProjectValue.ReferenceValue(ResourceReference reference))
-                || reference.kind() != ResourceReference.Kind.ASSET) {
+    private static AssetRef<EntityDefinition> pulseDefinition(ResourceReference reference) {
+        if (reference.kind() != ResourceReference.Kind.ASSET) {
             throw new IllegalArgumentException("pulse-definition must be an asset reference");
         }
         return AssetRef.to(AssetId.from(reference.locator()));
-    }
-
-    /** Converts one descriptor-validated text value into a semantic action identity. */
-    private static InputAction inputAction(ProjectValue value) {
-        if (!(value instanceof ProjectValue.TextValue(String name))) {
-            throw new IllegalArgumentException("pulse-action must be text");
-        }
-        return new InputAction(name);
     }
 }
